@@ -1,0 +1,20 @@
+/* 全局CSS：主题变量 + 基础重置 24002120407 叶浩然 */
+:root {                  /* CSS变量统一管理美团品牌色 */
+  --mt-yellow: #FFCE00;
+  --mt-orange: #FF6633;
+  --mt-dark: #222222;
+  --mt-gray: #666666;
+  --mt-border: #e5e5e5;
+  --mt-bg: #f5f5f5;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }   /* 通配符重置 */
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 14px; line-height: 1.6;
+  color: var(--mt-dark);
+  background: var(--mt-bg);
+}
+a { text-decoration: none; color: inherit; }
+ul { list-style: none; }
+img { display: block; max-width: 100%; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 16px; } /* 版心 */

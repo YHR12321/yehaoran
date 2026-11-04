@@ -1,0 +1,32 @@
+/* 网页元素1：顶部导航栏 24002120407 叶浩然 */
+.site-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e5e5;
+  position: sticky;      /* 吸顶导航 */
+  top: 0;
+  z-index: 99;
+}
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;         /* 弹性布局实现左中右三段式 */
+  align-items: center;
+  gap: 24px;
+  height: 64px;
+}
+.search-box {
+  flex: 1;
+  max-width: 520px;
+  display: flex;
+  border: 2px solid #FFCE00;   /* 美团主题黄 */
+  border-radius: 4px;
+  overflow: hidden;
+}
+.search-input { flex: 1; border: none; outline: none; padding: 0 14px; height: 38px; }
+.search-btn {
+  width: 78px; border: none; cursor: pointer;
+  background: #FFCE00; color: #222; font-size: 15px; font-weight: bold;
+}
+.search-btn:hover { background: #f5c400; }
+.nav-links { display: flex; gap: 28px; margin-left: auto; }  /* 靠右排列 */
+.nav-links a:hover { color: #FF6633; }

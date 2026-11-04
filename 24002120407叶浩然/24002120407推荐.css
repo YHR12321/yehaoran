@@ -1,0 +1,36 @@
+/* 网页元素2：商家推荐卡片 24002120407 叶浩然 */
+.shop-card {
+  width: 470px;
+  background: #fff;
+  border-radius: 8px;
+  display: flex;                 /* 左图右文布局 */
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  transition: transform .3s, box-shadow .3s;
+}
+.shop-card:hover {                /* 悬停上浮效果 */
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0,0,0,.12);
+}
+.shop-pic {                       /* 卡片图片：固定尺寸裁剪 */
+  width: 170px; height: 160px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.shop-info { flex: 1; padding: 14px 16px; display: flex; flex-direction: column; }
+.shop-name {
+  font-size: 17px; font-weight: bold;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; /* 超出省略 */
+}
+.stars { color: #ff9d00; font-size: 15px; letter-spacing: 2px; }  /* ★星级 */
+.score { color: #ff9d00; font-weight: bold; margin-left: 6px; }
+.shop-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag {
+  font-size: 12px; padding: 2px 8px; border-radius: 3px;
+  color: #FF6633; border: 1px solid #FF6633;
+}
+.tag-green { color: #2bb24c; border-color: #2bb24c; }
+.promo-icon {                     /* 满减小图标 */
+  background: #FF6633; color: #fff; font-size: 11px;
+  padding: 1px 5px; border-radius: 2px; margin-right: 6px; font-style: normal;
+}
