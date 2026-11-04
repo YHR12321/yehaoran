@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>新闻 Tab 选项卡</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            display: flex;
+            justify-content: center;
+            padding: 40px 16px;
+        }
+
+        .news-wrap {
+            width: min(800px, 100%);
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+            overflow: hidden;
+        }
+
+        .news-header {
+            padding: 22px 28px;
+            background: linear-gradient(135deg, #2a5298, #1e3c72);
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        /* ---- Tab 选项卡按钮 ---- */
+        .tab-nav {
+            display: flex;
+            border-bottom: 2px solid #e5e7eb;
+            background: #f8fafc;
+        }
+
+        .tab-item {
+            flex: 1;
+            padding: 16px 0;
+            text-align: center;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #6b7280;
+            transition: color 0.25s ease, background 0.25s ease;
+            position: relative;
+            user-select: none;
+        }
+
+        .tab-item:hover {
+            color: #2563eb;
+            background: #eff6ff;
+        }
+
+        /* 选中态：文字变色 + 底部蓝条 */
+        .tab-item.active {
+            color: #2563eb;
+            background: #fff;
+        }
+
+        .tab-item.active::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 10%;
+            width: 80%;
+            height: 3px;
+            background: #2563eb;
+            border-radius: 3px 3px 0 0;
+        }
+
+        /* ---- Tab 内容面板 ---- */
+        .tab-content {
+            padding: 24px 28px 30px;
+        }
+
+        .tab-panel {
+            display: none;               /* 默认隐藏 */
+            animation: fadeIn 0.35s ease;
+        }
+
+        .tab-panel.active {
+            display: block;              /* 选中时显示 */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-panel h2 {
+            margin: 0 0 14px;
+            font-size: 1.2rem;
+            color: #1f2937;
+            border-left: 4px solid #2563eb;
+            padding-left: 12px;
+        }
+
+        .news-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .news-list li {
+            padding: 12px 0;
+            border-bottom: 1px dashed #e5e7eb;
+            color: #374151;
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .news-list li:last-child {
+            border-bottom: none;
+        }
+
+        .news-list li::before {
+            content: "▶";
+            color: #2563eb;
+            margin-right: 8px;
+            font-size: 0.75rem;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-size: 0.72rem;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        @media (max-width: 560px) {
+            .tab-item { font-size: 0.88rem; padding: 14px 0; }
+            .news-header { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="news-wrap">
+        <div class="news-header">📰 新闻 Tab 选项卡</div>
+
+        <!-- 选项卡按钮 -->
+        <nav class="tab-nav">
+            <div class="tab-item">国内新闻</div>
+            <div class="tab-item">省内新闻</div>
+            <div class="tab-item">国际新闻</div>
+            <div class="tab-item">最热新闻</div>
+        </nav>
+
+        <!-- 选项卡内容 -->
+        <div class="tab-content">
+            <div class="tab-panel">
+                <h2>国内新闻</h2>
+                <ul class="news-list">
+                    <li>全国多地迎来入冬后首场降雪，部分地区气温骤降 8℃。</li>
+                    <li>国产大飞机 C919 完成首次跨城商业航班飞行。</li>
+                    <li>新能源汽车月度销量再创新高，市场渗透率突破 40%。</li>
+                    <li>国家图书馆推出古籍数字化项目，百万册珍本在线可查。</li>
+                </ul>
+            </div>
+
+            <div class="tab-panel">
+                <h2>省内新闻</h2>
+                <ul class="news-list">
+                    <li>省内高铁新线今日开通，省会到地级市最快 1 小时直达。</li>
+                    <li>省级科技创新大会召开，发布 50 项重点攻关项目。</li>
+                    <li>冬季文旅活动启动，全省 20 家景区推出惠民门票。</li>
+                    <li>省内高校毕业生留省就业政策升级，最高可获 5 万元补贴。</li>
+                </ul>
+            </div>
+
+            <div class="tab-panel">
+                <h2>国际新闻</h2>
+                <ul class="news-list">
+                    <li>联合国气候变化大会达成新协议，2030 年前减排目标升级。</li>
+                    <li>多国联合发射新一代空间站模块，国际太空合作持续深化。</li>
+                    <li>全球股市震荡回调，科技股领跌，能源板块逆势上涨。</li>
+                    <li>世界杯预选赛激战正酣，多支传统强队遭遇冷门。</li>
+                </ul>
+            </div>
+
+            <div class="tab-panel">
+                <h2>最热新闻</h2>
+                <ul class="news-list">
+                    <li>国产 AI 大模型发布最新版本，多项能力追平国际领先水平 <span class="tag">热</span></li>
+                    <li>知名导演新片首日票房破 2 亿，口碑票房双丰收 <span class="tag">爆</span></li>
+                    <li>奥运冠军官宣退役，粉丝纷纷留言致敬 <span class="tag">热</span></li>
+                    <li>双十一全网成交额再破纪录，物流峰值创历史新高 <span class="tag">爆</span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 外部引用 JS：TabSwitcher 组件 -->
+    <script src="js/tab.js"></script>
+    <script>
+        // 初始化：默认选中第 0 项（国内新闻）
+        new TabSwitcher({
+            tabs:        '.tab-item',
+            panels:      '.tab-panel',
+            activeClass: 'active',
+            defaultIndex: 0
+        });
+    </script>
+</body>
+</html>
