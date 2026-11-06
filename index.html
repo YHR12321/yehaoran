@@ -28,7 +28,20 @@
             font-weight: 700;
             color: #333;
             border-bottom: 1px solid #4caf50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+
+        /* 顶部导航链接 */
+        .page-nav-link {
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: #4caf50;
+            text-decoration: none;
+        }
+
+        .page-nav-link:hover { text-decoration: underline; }
 
         /* ========== 主体三栏布局 ========== */
         .page-body {
@@ -358,7 +371,10 @@
 </head>
 <body>
     <div class="page">
-        <header class="page-header">文学社科</header>
+        <header class="page-header">
+            <span>文学社科</span>
+            <a class="page-nav-link" href="swiper-task.html">Swiper 课堂任务 →</a>
+        </header>
 
         <div class="page-body">
             <!-- ========== 左侧：主编推荐 ========== -->
