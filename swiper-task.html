@@ -295,6 +295,51 @@
     </div>
   </div>
 
+  <!-- 任务「三」：parallax 视差效果 · 爱达·魔都号光影展（独立章节） -->
+  <div class="wy-sec">
+    <div class="wy-sec-head">
+      <span class="wy-no">三</span>
+      <h2>parallax 视差效果 · 爱达·魔都号光影展<small>parallax:true + data-swiper-parallax 系列属性</small></h2>
+    </div>
+    <p class="wy-txt">给轮播加上"景深"：<code>parallax: true</code> 开启视差后，幻灯片内带 <code>data-swiper-parallax</code> 属性的元素会以<b>不同速度</b>跟随切换移动——图片向左视差移动、标题向右错位滑入。本页展品：<b>爱达·魔都号</b>，首艘国产大型邮轮，2024年1月首航。</p>
+    <div class="wy-req">
+      <h3>✍️ 任务「三」要求</h3>
+      <p>初始化 <code>#wySw7</code>，开启 <code>parallax: true</code>；图片标签加 <code>data-swiper-parallax="-200"</code>，标题文字加 <code>data-swiper-parallax="100"</code>，实现图片与文字反方向错位的视差效果；展品为爱达·魔都号（首艘国产大型邮轮，2024年1月首航），图片为 16:9 横版。</p>
+      <span class="wy-star">⭐ 验证标准：切换时图片与标题以不同方向、不同速度错位移动，产生明显视差景深感</span>
+    </div>
+    <div class="wy-demo">
+      <span class="wy-demo-tag">🎛️ 演示「三」 · 爱达·魔都号 · 视差光影展</span>
+      <div class="wy-swiper">
+        <div class="swiper" id="wySw7">
+          <div class="swiper-wrapper">
+            <div class="swiper-slide">
+              <img src="swiper-imgs/adora_modu_1.jpg" alt="爱达·魔都号" data-swiper-parallax="-200">
+              <div class="wy-cap">
+                <h3 data-swiper-parallax="100">爱达·魔都号</h3>
+                <p>首艘国产大型邮轮，2024年1月首航</p>
+              </div>
+            </div>
+            <div class="swiper-slide">
+              <img src="swiper-imgs/adora_modu_1.jpg" alt="爱达·魔都号" data-swiper-parallax="-200">
+              <div class="wy-cap">
+                <h3 data-swiper-parallax="100">爱达·魔都号</h3>
+                <p>首艘国产大型邮轮，2024年1月首航</p>
+              </div>
+            </div>
+            <div class="swiper-slide">
+              <img src="swiper-imgs/adora_modu_1.jpg" alt="爱达·魔都号" data-swiper-parallax="-200">
+              <div class="wy-cap">
+                <h3 data-swiper-parallax="100">爱达·魔都号</h3>
+                <p>首艘国产大型邮轮，2024年1月首航</p>
+              </div>
+            </div>
+          </div>
+          <div class="swiper-pagination" id="wyPag7"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="wy-back"><a href="index.html">← 返回课堂实践中心</a>　<a href="swiper-lesson.html">查看教师讲解版 →</a></div>
 
   <footer>Swiper 课堂操作任务 · 大国重器光影展（学生版） · 高级网页设计 · 2026-2027-1</footer>
@@ -423,6 +468,21 @@
       autoplay: {
         delay: 3600,                             // 每 3.6 秒自动选下一部"影片"
         disableOnInteraction: false,             // 手动拖动后自动播放不停止
+      },
+    });
+
+  // ── 任务「三」：parallax 视差效果 · 爱达·魔都号光影展（独立章节） ──
+  var swiper7 = new Swiper('#wySw7', {
+      loop: true,                    // 无缝循环
+      speed: 900,                    // 切换动画时长 900 毫秒
+      parallax: true,                // 开启视差效果
+      autoplay: {
+        delay: 3800,                 // 每 3.8 秒自动切换
+        disableOnInteraction: false, // 手动拖动后自动播放不停止
+      },
+      pagination: {
+        el: '#wySw7 .swiper-pagination', // 圆点分页器
+        clickable: true,                 // 圆点可点击跳转
       },
     });
 </script>
