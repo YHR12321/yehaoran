@@ -208,14 +208,14 @@
     <p class="wy-txt">改一个 <code>effect</code> 参数，轮播立刻换一种"性格"：slide / fade / cube / coverflow / flip / cards。上面的 6 个按钮已经绑好了点击事件（读取 <code>btn.dataset.fx</code>），JS 还需要你补两段。</p>
     <div class="wy-req">
       <h3>✍️ 任务 4 要求</h3>
-      <p><b>基础分</b>：初始化 <code>#wySw4</code>，实现循环 + 自动播放（3.2 秒）+ 圆点分页器（#wyPag4），初始效果为 <code>'cube'</code>。</p>
+      <p><b>基础分</b>：初始化 <code>#wySw4</code>，实现循环 + 自动播放（3.2 秒）+ 圆点分页器（#wyPag4），初始效果为 <code>'slide'</code>，动画时长 800 毫秒。</p>
       <p><b>进阶分</b>：补全按钮点击事件中的 TODO——实现点击按钮<b>切换效果</b>。提示：Swiper 动态换 effect 不能只改参数，需要<b>先销毁旧实例再重建</b>（destroy + new）。</p>
       <span class="wy-star">⭐ 验证标准：基础分——轮播自动翻页；进阶分——点 cube 按钮变 3D 立方体、点 fade 变淡入淡出</span>
     </div>
     <div class="wy-fx">
-      <button data-fx="slide">slide 平推（默认·稳重）</button>
+      <button class="wy-on" data-fx="slide">slide 平推（默认·稳重）</button>
       <button data-fx="fade">fade 淡入淡出（优雅）</button>
-      <button class="wy-on" data-fx="cube">cube 3D 立方体（炫酷）</button>
+      <button data-fx="cube">cube 3D 立方体（炫酷）</button>
       <button data-fx="coverflow">coverflow 画廊堆叠（沉浸）</button>
       <button data-fx="flip">flip 翻页（复古）</button>
       <button data-fx="cards">cards 卡片（俏皮）</button>
@@ -232,6 +232,64 @@
             <div class="swiper-slide"><img src="swiper-imgs/fast_1.jpg" alt="中国天眼"><div class="wy-cap"><h3>中国天眼 FAST</h3><p>相册页面爱用 coverflow</p></div></div>
           </div>
           <div class="swiper-pagination" id="wyPag4"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 新任务「一」：cube 立方体轮播（独立于任务 4，任务 4 保持原样） -->
+  <div class="wy-sec">
+    <div class="wy-sec-head">
+      <span class="wy-no">一</span>
+      <h2>cube 立方体轮播<small>loop + autoplay + 圆点分页器 · 独立任务</small></h2>
+    </div>
+    <p class="wy-txt">这是一个<b>独立的 cube 效果轮播</b>，与上面的任务 4 互不影响：无缝循环、每 3.2 秒自动翻页、手动拖动后自动播放<b>不停止</b>、底部圆点可点击跳转。</p>
+    <div class="wy-req">
+      <h3>✍️ 任务「一」要求</h3>
+      <p>初始化 <code>#wySw5</code>，严格实现 4 个效果：<b>① 无缝循环</b>（loop:true）<b>② 自动翻页间隔 3.2 秒、手动滑动后不停止</b>（autoplay.delay + disableOnInteraction:false）<b>③ 圆点分页器且可点击</b>（pagination.el + clickable:true）<b>④ 切换效果为 cube</b>（effect:'cube'）。</p>
+      <span class="wy-star">⭐ 验证标准：照片呈 3D 立方体旋转翻页、自动播放、拖一下松手后继续自动翻、点圆点能跳转</span>
+    </div>
+    <div class="wy-demo">
+      <span class="wy-demo-tag">🎛️ 演示「一」 · cube 立方体轮播（独立任务）</span>
+      <div class="wy-swiper">
+        <div class="swiper" id="wySw5">
+          <div class="swiper-wrapper">
+            <div class="swiper-slide"><img src="swiper-imgs/tiangong_1.jpg" alt="天宫空间站"><div class="wy-cap"><h3>天宫空间站</h3><p>独立任务 · cube 立方体效果</p></div></div>
+            <div class="swiper-slide"><img src="swiper-imgs/fuxing_1.jpg" alt="复兴号动车组"><div class="wy-cap"><h3>复兴号动车组</h3><p>无缝循环 · 首尾相接</p></div></div>
+            <div class="swiper-slide"><img src="swiper-imgs/c919_1.jpg" alt="C919大飞机"><div class="wy-cap"><h3>C919 大飞机</h3><p>每 3.2 秒自动翻页</p></div></div>
+            <div class="swiper-slide"><img src="swiper-imgs/fendouzhe_1.jpg" alt="奋斗者号"><div class="wy-cap"><h3>奋斗者号</h3><p>手动拖动后自动播放不停止</p></div></div>
+            <div class="swiper-slide"><img src="swiper-imgs/fast_1.jpg" alt="中国天眼"><div class="wy-cap"><h3>中国天眼 FAST</h3><p>点击底部圆点可跳转</p></div></div>
+          </div>
+          <div class="swiper-pagination" id="wyPag5"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 任务「二」：creative 创意效果 · 电影选片墙（独立章节） -->
+  <div class="wy-sec">
+    <div class="wy-sec-head">
+      <span class="wy-no">二</span>
+      <h2>creative 创意效果 · 电影选片墙<small>effect:'creative' + creativeEffect 自定义变换</small></h2>
+    </div>
+    <p class="wy-txt">像电影网站的"选片墙"：<b>当前海报居中</b>，上一张<b>缩小、向左退场并带旋转角度</b>，下一张<b>放大后从右侧滑入进场</b>。全部通过 <code>creativeEffect.prev / next</code> 的 translate / rotate / scale / opacity 自定义。</p>
+    <div class="wy-req">
+      <h3>✍️ 任务「二」要求</h3>
+      <p>初始化 <code>#wySw6</code>，使用 <code>effect:'creative'</code> + <code>creativeEffect</code> 实现：<b>① 上一张</b>缩小（scale:0.75）、向左移动（translate 负向）、旋转（rotate:-12°）；<b>② 下一张</b>放大（scale:1.18）、从右侧进场（translate 正向）；<b>③ 无缝循环 + 自动播放 + 圆点分页器</b>。</p>
+      <span class="wy-star">⭐ 验证标准：翻页时上一张向左缩小旋转退场、下一张从右侧放大进场、循环自动播放、点圆点可跳转</span>
+    </div>
+    <div class="wy-demo">
+      <span class="wy-demo-tag">🎛️ 演示「二」 · 电影选片墙（creative 创意效果）</span>
+      <div class="wy-swiper">
+        <div class="swiper" id="wySw6">
+          <div class="swiper-wrapper">
+            <div class="swiper-slide"><img src="swiper-imgs/tiangong_1.jpg" alt="天宫空间站"><div class="wy-cap"><h3>《巡天》</h3><p>主演：天宫空间站 · 科幻大片 · 评分 9.5</p></div></div>
+            <div class="swiper-slide"><img src="swiper-imgs/fuxing_1.jpg" alt="复兴号动车组"><div class="wy-cap"><h3>《追风》</h3><p>主演：复兴号动车组 · 动作片 · 评分 9.2</p></div></div>
+            <div class="swiper-slide"><img src="swiper-imgs/c919_1.jpg" alt="C919大飞机"><div class="wy-cap"><h3>《翱翔》</h3><p>主演：C919 大飞机 · 航空大片 · 评分 9.0</p></div></div>
+            <div class="swiper-slide"><img src="swiper-imgs/fendouzhe_1.jpg" alt="奋斗者号"><div class="wy-cap"><h3>《深潜》</h3><p>主演：奋斗者号 · 冒险片 · 评分 9.4</p></div></div>
+            <div class="swiper-slide"><img src="swiper-imgs/fast_1.jpg" alt="中国天眼"><div class="wy-cap"><h3>《天眼》</h3><p>主演：中国天眼 FAST · 纪录片 · 评分 9.6</p></div></div>
+          </div>
+          <div class="swiper-pagination" id="wyPag6"></div>
         </div>
       </div>
     </div>
@@ -281,21 +339,23 @@
         disableOnInteraction: false,       // ③ 用户拖动后自动播放继续
       },
     });
-  // ── 任务 4：初始化 #wySw4，无缝循环 + 3.2 秒自动翻页 + 圆点分页器 + cube 立方体效果 ──
+  // ── 任务 4：初始化 #wySw4，循环 + 3.2 秒自动播放 + 圆点 + 初始 effect ──
+  // TODO: 在这里写你的代码
   // 把配置抽成一个对象：进阶部分重建实例时直接复用，不用重复写一遍
   var sw4Config = {
-      loop: true,                                // ① 无缝循环
-      effect: 'cube',                            // ④ 切换动画效果：3D 立方体
+      loop: true,                      // 循环播放
+      speed: 800,                      // 切换动画 800 毫秒
+      effect: 'slide',                 // 初始效果：平推
       pagination: {
-        el: '#wySw4 .swiper-pagination',         // ③ 圆点分页器（限定在 #wySw4 内，避免选中其它轮播的分页器）
-        clickable: true,                         //    点击圆点可跳转对应页
+        el: "#wyPag4",                 // 圆点分页器（任务 4 只给了圆点，没有箭头）
+        clickable: true,
       },
       autoplay: {
-        delay: 3200,                             // ② 每 3.2 秒自动翻页
-        disableOnInteraction: false,             //    重点：手动滑动后自动轮播不停止
+        delay: 3200,                   // 每 3.2 秒自动播放
+        disableOnInteraction: false,   // 手动滑动后继续自动播放
       },
     };
-  var swiper4 = new Swiper('#wySw4', sw4Config);
+  var swiper4 = new Swiper("#wySw4", sw4Config);
 
   // ── 任务 4 进阶：补全按钮点击事件，实现六种效果实时切换 ──
   // 提示 1：动态换 effect 只改参数是无效的，必须销毁旧实例再重建（destroy + new）
@@ -318,11 +378,53 @@
       // TODO 3：用新 effect 重建实例（把其它配置原样保留）
       sw4Config.effect = fx;
       // cards（卡片）效果本身不支持 loop 循环，这里做个兼容处理
-      sw4Config.loop = (fx === 'cards') ? false : true;6
+      sw4Config.loop = (fx === 'cards') ? false : true;
 
       swiper4 = new Swiper("#wySw4", sw4Config);
     });
   });
+
+  // ── 新任务「一」：cube 立方体轮播（独立于任务 4，任务 4 保持原样） ──
+  var swiper5 = new Swiper('#wySw5', {
+      loop: true,                                // ① 无缝循环
+      effect: 'cube',                            // ④ 切换动画效果：cube 3D 立方体
+      pagination: {
+        el: '#wySw5 .swiper-pagination',         // ③ 圆点分页器（页面多个轮播共用 .swiper-pagination 类，限定容器避免绑错到其它轮播）
+        clickable: true,                         //    点击圆点可跳转对应页
+      },
+      autoplay: {
+        delay: 3200,                             // ② 每 3.2 秒自动翻页
+        disableOnInteraction: false,             //    重点：手动滑动后自动轮播不停止
+      },
+    });
+
+  // ── 任务「二」：creative 创意效果 · 电影选片墙（独立于任务「一」，互不影响） ──
+  var swiper6 = new Swiper('#wySw6', {
+      loop: true,                                // 无缝循环
+      speed: 800,                                // 切换动画 800 毫秒
+      effect: 'creative',                        // 使用 creative 创意切换效果
+      creativeEffect: {
+        prev: {                                  // 离开的上一张
+          translate: ['-115%', 0, -280],         // 向左偏移并推远（x 负值 = 左移，z 负值 = 后退）
+          rotate: [0, 0, -12],                   // 增加 Z 轴旋转角度：绕 Z 轴左转 12 度
+          scale: 0.8,                            // 缩小到 80%
+        },
+        next: {                                  // 进场的下一张
+          translate: ['115%', 0, -150],          // 向右偏移（x 正值 = 右移），稍推远避免遮挡当前张
+          scale: 1.15,                           // 放大到 115%
+        },
+        limitProgress: 2,                        // 前后各 2 张参与变形，选片墙更有层次
+        perspective: true,                       // 开启 3D 透视，使 Z 轴位移生效
+      },
+      pagination: {
+        el: '#wySw6 .swiper-pagination',         // 圆点分页器（限定容器，避免绑到其它轮播）
+        clickable: true,                         // 点击圆点可跳转
+      },
+      autoplay: {
+        delay: 3600,                             // 每 3.6 秒自动选下一部"影片"
+        disableOnInteraction: false,             // 手动拖动后自动播放不停止
+      },
+    });
 </script>
 </body>
 </html>
