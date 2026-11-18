@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<!--
+=========================================================
+ * 文件名称：mobile-sensor.html
+ * 作    者：叶浩然
+ * 学    号：24002120407
+ * 建立时间：2026-11-18
+ * 大模型：Trae
+ * 功能名称：任务四 · 摇一摇抽今日菜谱（devicemotion + 18 阈值 + 1.5s 冷却）
+ * =========================================================
+-->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>摇一摇 · 今日菜谱</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(180deg, #f3f7f4 0%, #e8f1ea 100%);
+            color: #26313c;
+            min-height: 100vh;
+            padding: 22px 14px 32px;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .yhr_page {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .yhr_head h1 {
+            font-size: 1.22rem;
+            color: #1f2d3a;
+        }
+
+        /* 页面提示文字 */
+        .yhr_tip {
+            margin-top: 8px;
+            font-size: 0.82rem;
+            color: #2e7d32;
+            background: #fff;
+            border: 1px solid #dbe9dd;
+            border-radius: 10px;
+            padding: 10px 14px;
+            line-height: 1.6;
+        }
+
+        /* ========== 抽取面板 ========== */
+        .yhr_panel {
+            margin-top: 18px;
+            background: #fff;
+            border: 1px solid #e3e8ee;
+            border-radius: 16px;
+            padding: 26px 18px 22px;
+            text-align: center;
+            box-shadow: 0 12px 28px rgba(30, 40, 50, 0.08);
+        }
+
+        /* 圆形餐盘，用于承载抽取结果 */
+        .yhr_plate {
+            width: 240px;
+            height: 240px;
+            margin: 0 auto;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #ffffff 0%, #f1f8f2 55%, #dcf0e0 100%);
+            border: 2px dashed #b9dcc0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            overflow: hidden;
+        }
+
+        .yhr_label {
+            font-size: 0.74rem;
+            color: #8aa392;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+
+        .yhr_result {
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: #2e7d32;
+            letter-spacing: 2px;
+            line-height: 1.4;
+            word-break: break-all;
+        }
+
+        .yhr_tag {
+            margin-top: 10px;
+            font-size: 0.72rem;
+            color: #7c8b98;
+        }
+
+        /* 弹出动画：缩放到略大于 1 再回落 */
+        @keyframes yhr_pop {
+            0% {
+                transform: scale(0.6);
+                opacity: 0;
+            }
+            60% {
+                transform: scale(1.08);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .yhr_pop {
+            animation: yhr_pop 0.45s ease;
+        }
+
+        /* ========== 状态与按钮 ========== */
+        .yhr_status {
+            min-height: 22px;
+            margin-top: 18px;
+            font-size: 0.78rem;
+            color: #7c8b98;
+            line-height: 1.6;
+        }
+
+        .yhr_status.yhr_warn {
+            color: #e0533d;
+        }
+
+        .yhr_btn {
+            margin-top: 16px;
+            font: inherit;
+            font-size: 0.86rem;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(180deg, #59bd63, #3f9e4a);
+            border: none;
+            border-radius: 22px;
+            padding: 12px 30px;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(76, 175, 80, 0.32);
+        }
+
+        .yhr_btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 3px 10px rgba(76, 175, 80, 0.28);
+        }
+    </style>
+</head>
+<body>
+    <main class="yhr_page">
+        <header class="yhr_head">
+            <h1>今日菜谱</h1>
+            <!-- 需求 1：页面提示 -->
+            <p class="yhr_tip">摇一摇手机，抽今日菜谱</p>
+        </header>
+
+        <section class="yhr_panel">
+            <div class="yhr_plate">
+                <p class="yhr_label">今日推荐</p>
+                <div class="yhr_result" id="yhrResult">等待摇动</div>
+                <p class="yhr_tag" id="yhrTag">摇一摇或点下方按钮</p>
+            </div>
+
+            <p class="yhr_status" id="yhrStatus">正在检测摇动…</p>
+
+            <!-- 需求 5：降级方案按钮 -->
+            <button class="yhr_btn" id="yhrBtn" type="button">点我抽一次</button>
+        </section>
+    </main>
+
+    <script>
+    (function () {
+        'use strict';
+
+        /* ================= 元素引用 ================= */
+        var yhr_result = document.getElementById('yhrResult');
+        var yhr_tag = document.getElementById('yhrTag');
+        var yhr_status = document.getElementById('yhrStatus');
+        var yhr_btn = document.getElementById('yhrBtn');
+
+        /* ================= 菜谱数据 ================= */
+        var yhr_dishes = [
+            { name: '红烧肉', tag: '浓油赤酱 · 下饭首选' },
+            { name: '清蒸鲈鱼', tag: '清淡鲜美 · 时令推荐' },
+            { name: '番茄牛腩', tag: '酸甜浓郁 · 汤汁拌饭' },
+            { name: '宫保鸡丁', tag: '微辣回甜 · 经典川味' },
+            { name: '麻婆豆腐', tag: '麻辣鲜香 · 热气腾腾' },
+            { name: '蒜蓉西兰花', tag: '清爽解腻 · 少油快炒' },
+            { name: '糖醋排骨', tag: '酸甜开胃 · 老少皆宜' },
+            { name: '抹茶提拉米苏', tag: '微苦回甘 · 餐后甜点' }
+        ];
+
+        /* ================= 参数与状态 ================= */
+        var yhr_threshold = 18;        // 合成加速度阈值（m/s²），超过判定为摇动
+        var yhr_cooldown = 1500;       // 冷却时长（ms），防止一次摇动重复触发
+        var yhr_watchdog = 1600;       // 无数据超时时间（ms），用于判断设备不支持
+
+        var yhr_lastShake = 0;         // 上次触发摇动的时间戳
+        var yhr_hasData = false;       // 是否收到过有效的加速度数据
+        var yhr_listening = false;     // 是否已绑定 devicemotion
+        var yhr_lastIndex = -1;        // 上一次抽到的菜，避免连续重复
+        var yhr_supported = ('DeviceMotionEvent' in window);
+
+        /**
+         * 函数主要实现功能：随机抽取一道菜，更新菜名与标签并播放弹出动画
+         */
+        function yhrDrawDish() {
+            var yhr_index = Math.floor(Math.random() * yhr_dishes.length);
+            // 只有多于 1 道菜时，避免连续两次抽到同一道
+            if (yhr_dishes.length > 1 && yhr_index === yhr_lastIndex) {
+                yhr_index = (yhr_index + 1 + Math.floor(Math.random() * (yhr_dishes.length - 1))) % yhr_dishes.length;
+            }
+            yhr_lastIndex = yhr_index;
+
+            var yhr_dish = yhr_dishes[yhr_index];
+            yhr_result.textContent = yhr_dish.name;
+            yhr_tag.textContent = yhr_dish.tag;
+
+            // 先移除动画类并强制重排，保证每次都能重新触发动画
+            yhr_result.classList.remove('yhr_pop');
+            void yhr_result.offsetWidth;
+            yhr_result.classList.add('yhr_pop');
+        }
+
+        /**
+         * 函数主要实现功能：更新面板下方的状态提示文字
+         * @param {string} text - 提示内容
+         * @param {boolean} warn - 是否为异常提示（红色）
+         */
+        function yhrSetStatus(text, warn) {
+            yhr_status.textContent = text;
+            if (warn) {
+                yhr_status.classList.add('yhr_warn');
+            } else {
+                yhr_status.classList.remove('yhr_warn');
+            }
+        }
+
+        /**
+         * 函数主要实现功能：显示设备不支持的提示，并保留“点我抽一次”作为降级方案
+         */
+        function yhrShowUnsupported() {
+            if (yhr_hasData) {
+                return;
+            }
+            yhrSetStatus('当前设备不支持，请用手机打开', true);
+            yhr_tag.textContent = '也可以直接点下方按钮抽取';
+        }
+
+        /**
+         * 函数主要实现功能：监听 devicemotion，用 accelerationIncludingGravity 计算合成加速度并判断是否摇动
+         * @param {DeviceMotionEvent} e - 设备运动事件对象
+         */
+        function yhrOnMotion(e) {
+            var yhr_acc = e.accelerationIncludingGravity;
+            if (!yhr_acc) {
+                return;
+            }
+            // 三项全为 null 说明设备没有提供加速度数据
+            if (yhr_acc.x === null && yhr_acc.y === null && yhr_acc.z === null) {
+                return;
+            }
+
+            if (!yhr_hasData) {
+                yhr_hasData = true;
+                yhrSetStatus('检测中：摇一摇手机即可抽菜', false);
+            }
+
+            var yhr_x = yhr_acc.x || 0;
+            var yhr_y = yhr_acc.y || 0;
+            var yhr_z = yhr_acc.z || 0;
+            // 合成加速度：静止时约为 9.8（重力），剧烈晃动时会明显变大
+            var yhr_magnitude = Math.sqrt(yhr_x * yhr_x + yhr_y * yhr_y + yhr_z * yhr_z);
+
+            if (yhr_magnitude <= yhr_threshold) {
+                return;
+            }
+
+            // 1.5 秒冷却，冷却期内的抖动直接忽略
+            var yhr_now = Date.now();
+            if (yhr_now - yhr_lastShake < yhr_cooldown) {
+                return;
+            }
+            yhr_lastShake = yhr_now;
+
+            yhrDrawDish();
+            yhrSetStatus('检测到摇动，已抽取一道菜', false);
+        }
+
+        /**
+         * 函数主要实现功能：绑定 devicemotion 监听，并启动“无数据”超时检测
+         */
+        function yhrStartListen() {
+            if (yhr_listening || !yhr_supported) {
+                return;
+            }
+            yhr_listening = true;
+            window.addEventListener('devicemotion', yhrOnMotion, { passive: true });
+            setTimeout(function () {
+                if (!yhr_hasData) {
+                    yhrShowUnsupported();
+                }
+            }, yhr_watchdog);
+        }
+
+        /**
+         * 函数主要实现功能：点击降级按钮时抽取一道菜；iOS 上同时尝试申请体感权限
+         */
+        function yhrOnButtonClick() {
+            // iOS 13+ 需要用户手势才能申请体感权限
+            if (yhr_supported && !yhr_hasData &&
+                typeof window.DeviceMotionEvent.requestPermission === 'function') {
+                window.DeviceMotionEvent.requestPermission().then(function (state) {
+                    if (state === 'granted') {
+                        yhrStartListen();
+                    }
+                }).catch(function () {
+                    // 用户拒绝授权时保持按钮降级方案
+                });
+            }
+            yhrDrawDish();
+            yhrSetStatus('已使用按钮抽取（摇一摇仍可继续）', false);
+        }
+
+        /**
+         * 函数主要实现功能：初始化页面，判断设备能力并绑定按钮事件
+         */
+        function yhrInit() {
+            yhr_btn.addEventListener('click', yhrOnButtonClick);
+
+            if (!yhr_supported) {
+                yhrShowUnsupported();
+                return;
+            }
+            yhrStartListen();
+        }
+
+        yhrInit();
+    })();
+    </script>
+</body>
+</html>

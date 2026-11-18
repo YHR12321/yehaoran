@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<!--
+=========================================================
+ * 文件名称：mobile-gesture.html
+ * 作    者：叶浩然
+ * 学    号：24002120407
+ * 建立时间：2026-11-18
+ * 大模型：Trae
+ * 功能名称：任务二 · 移动端美食卡片左右滑动切换（touchstart/touchend + 40px 阈值）
+ * =========================================================
+-->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>今日推荐 · 美食卡片</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: #f4f5f7;
+            color: #26313c;
+            min-height: 100vh;
+            padding: 20px 14px 32px;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        /* ========== 页面容器 ========== */
+        .yhr_page {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .yhr_head h1 {
+            font-size: 1.22rem;
+            color: #1f2d3a;
+        }
+
+        .yhr_sub {
+            margin-top: 6px;
+            font-size: 0.76rem;
+            color: #8b98a4;
+        }
+
+        /* ========== 卡片容器：纵向仍可滚动，横向交给 JS 处理 ========== */
+        .yhr_card-wrap {
+            margin-top: 16px;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 12px 28px rgba(30, 40, 50, 0.16);
+            touch-action: pan-y;
+        }
+
+        .yhr_track {
+            display: flex;
+            transition: transform 0.3s ease;
+            will-change: transform;
+        }
+
+        /* ========== 单张卡片 ========== */
+        .yhr_card {
+            flex: 0 0 100%;
+            height: 56vh;
+            min-height: 330px;
+            max-height: 440px;
+            padding: 22px 20px 24px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            color: #fff;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* 卡片右上角序号 */
+        .yhr_no {
+            position: absolute;
+            top: 16px;
+            right: 18px;
+            font-size: 0.72rem;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* 装饰光斑 */
+        .yhr_card::after {
+            content: "";
+            position: absolute;
+            top: -70px;
+            right: -60px;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .yhr_tag {
+            align-self: flex-start;
+            font-size: 0.68rem;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .yhr_dish {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .yhr_desc {
+            font-size: 0.82rem;
+            line-height: 1.85;
+            color: rgba(255, 255, 255, 0.92);
+            text-align: justify;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ========== 四道菜的渐变背景 ========== */
+        .yhr_g1 {
+            background: linear-gradient(160deg, #ff9d6b 0%, #d94f2b 58%, #9e2a1a 100%);
+        }
+
+        .yhr_g2 {
+            background: linear-gradient(160deg, #7ed0e8 0%, #2b8fae 58%, #155e78 100%);
+        }
+
+        .yhr_g3 {
+            background: linear-gradient(160deg, #ffb46b 0%, #e0533d 55%, #8f2a1e 100%);
+        }
+
+        .yhr_g4 {
+            background: linear-gradient(160deg, #bfe3a4 0%, #5fa463 55%, #2f6b3d 100%);
+        }
+
+        /* ========== 边界提示 ========== */
+        .yhr_hint {
+            min-height: 24px;
+            margin-top: 12px;
+            text-align: center;
+            font-size: 0.78rem;
+            color: #e0533d;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .yhr_hint.yhr_show {
+            opacity: 1;
+        }
+
+        /* ========== 底部计数 ========== */
+        .yhr_footer {
+            margin-top: 4px;
+            display: flex;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: #5b6b7a;
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
+</head>
+<body>
+    <main class="yhr_page">
+        <header class="yhr_head">
+            <h1>今日推荐 · 美食卡片</h1>
+            <p class="yhr_sub">左右滑动切换菜品，纵向拖动仍可滚动页面</p>
+        </header>
+
+        <!-- 卡片容器：touch-action: pan-y 保留纵向滚动 -->
+        <div class="yhr_card-wrap" id="yhrCardWrap">
+            <div class="yhr_track" id="yhrTrack">
+                <article class="yhr_card yhr_g1">
+                    <span class="yhr_no">01 / 04</span>
+                    <span class="yhr_tag">招牌</span>
+                    <h2 class="yhr_dish">红烧肉</h2>
+                    <p class="yhr_desc">五花肉小火慢炖 90 分钟，冰糖上色，酱香浓郁，肥而不腻，入口即化。</p>
+                </article>
+
+                <article class="yhr_card yhr_g2">
+                    <span class="yhr_no">02 / 04</span>
+                    <span class="yhr_tag">时令</span>
+                    <h2 class="yhr_dish">清蒸鲈鱼</h2>
+                    <p class="yhr_desc">活鱼现杀，姜丝葱段清蒸 8 分钟，出锅淋一勺热油，鱼肉鲜甜滑嫩。</p>
+                </article>
+
+                <article class="yhr_card yhr_g3">
+                    <span class="yhr_no">03 / 04</span>
+                    <span class="yhr_tag">人气</span>
+                    <h2 class="yhr_dish">番茄牛腩</h2>
+                    <p class="yhr_desc">牛腩炖至软烂，番茄熬出沙，汤汁酸甜浓稠，拌饭一绝，暖胃又下饭。</p>
+                </article>
+
+                <article class="yhr_card yhr_g4">
+                    <span class="yhr_no">04 / 04</span>
+                    <span class="yhr_tag">甜品</span>
+                    <h2 class="yhr_dish">抹茶提拉米苏</h2>
+                    <p class="yhr_desc">宇治抹茶配马斯卡彭，微苦回甘，冷藏 4 小时后口感最佳，清新不腻。</p>
+                </article>
+            </div>
+        </div>
+
+        <p class="yhr_hint" id="yhrHint"></p>
+
+        <div class="yhr_footer">
+            <span id="yhrCounter">第 1/4 张</span>
+        </div>
+    </main>
+
+    <script>
+    (function () {
+        'use strict';
+
+        /* ========== 元素引用 ========== */
+        var yhr_wrap = document.getElementById('yhrCardWrap');
+        var yhr_track = document.getElementById('yhrTrack');
+        var yhr_hint = document.getElementById('yhrHint');
+        var yhr_counter = document.getElementById('yhrCounter');
+
+        /* ========== 状态变量 ========== */
+        var yhr_index = 0;                 // 当前卡片索引，从 0 开始
+        var yhr_total = yhr_track.children.length;
+        var yhr_startX = 0;                // touchstart 记录的起点 X
+        var yhr_startY = 0;                // touchstart 记录的起点 Y
+        var yhr_locked = false;            // 切换冷却锁，防止一次滑动跳两张
+        var yhr_hintTimer = null;          // 边界提示的隐藏定时器
+
+        var yhr_THRESHOLD = 40;            // 横向位移阈值（px）
+        var yhr_COOLDOWN = 300;            // 冷却时长（ms）
+        var yhr_HINT_DURATION = 1600;      // 边界提示停留时长（ms）
+
+        /**
+         * 函数主要实现功能：切换到指定索引的卡片，同时更新位移、过渡动画和底部计数
+         * @param {number} index - 目标卡片索引
+         */
+        function yhrGoTo(index) {
+            yhr_index = index;
+            yhr_track.style.transform = 'translateX(' + (-yhr_index * 100) + '%)';
+            yhr_counter.textContent = '第 ' + (yhr_index + 1) + '/' + yhr_total + ' 张';
+        }
+
+        /**
+         * 函数主要实现功能：在卡片下方显示边界提示文字，并在 1.6 秒后自动淡出
+         * @param {string} text - 提示内容，如“已经是第一张”
+         */
+        function yhrShowHint(text) {
+            yhr_hint.textContent = text;
+            yhr_hint.classList.add('yhr_show');
+            clearTimeout(yhr_hintTimer);
+            yhr_hintTimer = setTimeout(function () {
+                yhr_hint.classList.remove('yhr_show');
+            }, yhr_HINT_DURATION);
+        }
+
+        /**
+         * 函数主要实现功能：开启 300ms 冷却锁，锁定期内忽略新的切换手势
+         */
+        function yhrLock() {
+            yhr_locked = true;
+            setTimeout(function () {
+                yhr_locked = false;
+            }, yhr_COOLDOWN);
+        }
+
+        /**
+         * 函数主要实现功能：手指按下时记录起点坐标，作为横向位移的计算基准
+         * @param {TouchEvent} e - 触摸事件对象
+         */
+        function yhrOnTouchStart(e) {
+            if (!e.touches.length) {
+                return;
+            }
+            yhr_startX = e.touches[0].clientX;
+            yhr_startY = e.touches[0].clientY;
+        }
+
+        /**
+         * 函数主要实现功能：手指抬起时用 changedTouches[0] 计算横向位移，判断左滑或右滑并切换卡片
+         * @param {TouchEvent} e - 触摸事件对象
+         */
+        function yhrOnTouchEnd(e) {
+            if (yhr_locked || !e.changedTouches.length) {
+                return;
+            }
+            var yhr_endX = e.changedTouches[0].clientX;
+            var yhr_endY = e.changedTouches[0].clientY;
+            var yhr_dx = yhr_endX - yhr_startX;
+            var yhr_dy = yhr_endY - yhr_startY;
+
+            // 横向位移不足 40px，或纵向位移更大（说明是页面滚动），不触发切换
+            if (Math.abs(yhr_dx) < yhr_THRESHOLD || Math.abs(yhr_dx) <= Math.abs(yhr_dy)) {
+                return;
+            }
+
+            if (yhr_dx < 0) {
+                // 左滑：切到下一张
+                if (yhr_index >= yhr_total - 1) {
+                    yhrShowHint('已经是最后一张');
+                    return;
+                }
+                yhrGoTo(yhr_index + 1);
+                yhrLock();
+            } else {
+                // 右滑：切到上一张
+                if (yhr_index <= 0) {
+                    yhrShowHint('已经是第一张');
+                    return;
+                }
+                yhrGoTo(yhr_index - 1);
+                yhrLock();
+            }
+        }
+
+        /**
+         * 函数主要实现功能：初始化页面，绑定触摸事件并设置首次进入时的卡片计数
+         */
+        function yhrInit() {
+            yhr_wrap.addEventListener('touchstart', yhrOnTouchStart, { passive: true });
+            yhr_wrap.addEventListener('touchend', yhrOnTouchEnd, { passive: true });
+            yhrGoTo(0);
+        }
+
+        yhrInit();
+    })();
+    </script>
+</body>
+</html>

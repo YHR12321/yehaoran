@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<!--
+=========================================================
+ * 文件名称：mobile-zoom.html
+ * 作    者：叶浩然
+ * 学    号：24002120407
+ * 建立时间：2026-11-18
+ * 大模型：Trae
+ * 功能名称：任务三 · 移动端图片查看器（双指缩放 1~4 倍 + 单指拖动 + 双击 1x/2x）
+ * =========================================================
+-->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>图片查看器 · 双指缩放</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: #f4f5f7;
+            color: #26313c;
+            min-height: 100vh;
+            padding: 20px 14px 32px;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .yhr_page {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .yhr_head h1 {
+            font-size: 1.22rem;
+            color: #1f2d3a;
+        }
+
+        /* 页面打开时的提示文字 */
+        .yhr_tip {
+            margin-top: 8px;
+            font-size: 0.78rem;
+            color: #e0533d;
+            background: #fff3f0;
+            border: 1px solid #ffd9d0;
+            border-radius: 8px;
+            padding: 8px 12px;
+            line-height: 1.6;
+        }
+
+        /* ========== 查看器容器：裁切 + 禁用默认手势 + 禁止选中 ========== */
+        .yhr_stage {
+            position: relative;
+            margin-top: 14px;
+            height: 58vh;
+            min-height: 320px;
+            max-height: 520px;
+            overflow: hidden;
+            border-radius: 14px;
+            background: #0b0f14;
+            box-shadow: 0 12px 28px rgba(30, 40, 50, 0.16);
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 图片：铺满容器，变换原点固定在中心 */
+        .yhr_img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform-origin: center center;
+            transform: translate(0, 0) scale(1);
+            will-change: transform;
+            pointer-events: none;
+            -webkit-user-drag: none;
+        }
+
+        /* 只有程序触发的动画才加这个类，手势过程中绝不加，避免与手指位置打架 */
+        .yhr_img.yhr_animating {
+            transition: transform 0.25s ease;
+        }
+
+        /* ========== 底部状态 ========== */
+        .yhr_bar {
+            margin-top: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            color: #5b6b7a;
+        }
+
+        .yhr_scale {
+            font-weight: 700;
+            color: #2e7d32;
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
+</head>
+<body>
+    <main class="yhr_page">
+        <header class="yhr_head">
+            <h1>图片查看器</h1>
+            <!-- 需求 6：页面打开时的提示 -->
+            <p class="yhr_tip" id="yhrTip">双指缩放请用手机打开（电脑端请在 DevTools 设备模式开启 Touch 模拟）</p>
+        </header>
+
+        <!-- 需求 1：容器 overflow:hidden / touch-action:none / user-select:none -->
+        <div class="yhr_stage" id="yhrStage">
+            <img class="yhr_img" id="yhrImg" src="swiper-imgs/adora_modu_1.jpg" alt="爱达·魔都号" draggable="false" />
+        </div>
+
+        <div class="yhr_bar">
+            <span>当前缩放：<b class="yhr_scale" id="yhrScale">1.0x</b></span>
+            <span>双击放大 / 缩小 · 单指拖动</span>
+        </div>
+    </main>
+
+    <script>
+    (function () {
+        'use strict';
+
+        /* ================= 元素引用 ================= */
+        var yhr_stage = document.getElementById('yhrStage');
+        var yhr_img = document.getElementById('yhrImg');
+        var yhr_scaleText = document.getElementById('yhrScale');
+
+        /* ================= 常量 ================= */
+        var yhr_minScale = 1;          // 最小缩放倍数
+        var yhr_maxScale = 4;          // 最大缩放倍数
+        var yhr_tapMove = 10;          // 判定为点击的最大位移（px）
+        var yhr_tapTime = 250;         // 判定为点击的最大时长（ms）
+        var yhr_doubleGap = 300;       // 两次点击的最大间隔（ms），用于识别双击
+        var yhr_animMs = 260;          // 与 CSS 中 0.25s 过渡对应的清理时长
+
+        /* ================= 状态 ================= */
+        var yhr_state = { scale: 1, x: 0, y: 0 };  // 当前缩放倍数与平移量（px）
+        var yhr_rect = null;                        // 容器在视口中的位置尺寸（手势开始时缓存）
+        var yhr_center = { x: 0, y: 0 };            // 容器中心（相对容器坐标）
+        var yhr_pinch = null;                       // 双指手势状态
+        var yhr_pan = null;                         // 单指手势状态
+        var yhr_pendingTap = null;                  // 上一次点击信息，用于判断双击
+        var yhr_tapCandidate = false;               // 本次手势是否可能是点击（双指参与后立即失效）
+        var yhr_animTimer = null;                   // 过渡类名清理定时器
+        var yhr_lastTouchTime = 0;                  // 最近一次触摸时间，避免与桌面 dblclick 重复触发
+
+        /**
+         * 函数主要实现功能：读取并缓存容器在视口中的位置与尺寸，同时算出容器中心点
+         */
+        function yhrReadRect() {
+            yhr_rect = yhr_stage.getBoundingClientRect();
+            yhr_center.x = yhr_rect.width / 2;
+            yhr_center.y = yhr_rect.height / 2;
+        }
+
+        /**
+         * 函数主要实现功能：把缩放倍数限制在 1~4 倍之间
+         * @param {number} scale - 待限制的缩放倍数
+         * @returns {number} 限制后的缩放倍数
+         */
+        function yhrClampScale(scale) {
+            return Math.min(yhr_maxScale, Math.max(yhr_minScale, scale));
+        }
+
+        /**
+         * 函数主要实现功能：把平移量限制在图片边界内，缩放回 1 倍时同时归零
+         */
+        function yhrClampPan() {
+            if (yhr_state.scale <= yhr_minScale) {
+                yhr_state.scale = yhr_minScale;
+                yhr_state.x = 0;
+                yhr_state.y = 0;
+                return;
+            }
+            // 图片以容器中心为原点放大，可移动的最大距离是“多出来的宽度/高度的一半”
+            var yhr_maxX = (yhr_rect.width * (yhr_state.scale - 1)) / 2;
+            var yhr_maxY = (yhr_rect.height * (yhr_state.scale - 1)) / 2;
+            yhr_state.x = Math.min(yhr_maxX, Math.max(-yhr_maxX, yhr_state.x));
+            yhr_state.y = Math.min(yhr_maxY, Math.max(-yhr_maxY, yhr_state.y));
+        }
+
+        /**
+         * 函数主要实现功能：把当前缩放与平移写入 transform，并同步底部倍数文字
+         * @param {boolean} animate - 是否带 0.25s 过渡（手势中必须为 false）
+         */
+        function yhrSetTransform(animate) {
+            clearTimeout(yhr_animTimer);
+            if (animate) {
+                yhr_img.classList.add('yhr_animating');
+                yhr_animTimer = setTimeout(function () {
+                    yhr_img.classList.remove('yhr_animating');
+                }, yhr_animMs);
+            } else {
+                yhr_img.classList.remove('yhr_animating');
+            }
+            yhr_img.style.transform =
+                'translate(' + yhr_state.x + 'px,' + yhr_state.y + 'px) scale(' + yhr_state.scale + ')';
+            yhr_scaleText.textContent = yhr_state.scale.toFixed(1) + 'x';
+        }
+
+        /**
+         * 函数主要实现功能：计算两个触点之间的直线距离
+         * @param {Touch} t1 - 第一个触点
+         * @param {Touch} t2 - 第二个触点
+         * @returns {number} 两指距离（px）
+         */
+        function yhrDistance(t1, t2) {
+            var yhr_dx = t1.clientX - t2.clientX;
+            var yhr_dy = t1.clientY - t2.clientY;
+            return Math.sqrt(yhr_dx * yhr_dx + yhr_dy * yhr_dy);
+        }
+
+        /**
+         * 函数主要实现功能：计算两个触点的中点，并转换为容器内坐标
+         * @param {Touch} t1 - 第一个触点
+         * @param {Touch} t2 - 第二个触点
+         * @returns {Object} 含 x、y 的中点坐标
+         */
+        function yhrMidpoint(t1, t2) {
+            return {
+                x: (t1.clientX + t2.clientX) / 2 - yhr_rect.left,
+                y: (t1.clientY + t2.clientY) / 2 - yhr_rect.top
+            };
+        }
+
+        /**
+         * 函数主要实现功能：把客户端坐标转换为容器内坐标
+         * @param {number} clientX - 视口 X 坐标
+         * @param {number} clientY - 视口 Y 坐标
+         * @returns {Object} 含 x、y 的容器内坐标
+         */
+        function yhrToStage(clientX, clientY) {
+            return { x: clientX - yhr_rect.left, y: clientY - yhr_rect.top };
+        }
+
+        /**
+         * 函数主要实现功能：进入双指状态，记录初始距离、初始缩放和平移，并算出两指中点下的图片坐标
+         * @param {Touch} t1 - 第一个触点
+         * @param {Touch} t2 - 第二个触点
+         */
+        function yhrStartPinch(t1, t2) {
+            yhr_tapCandidate = false;   // 出现双指就不再可能是单击
+            var yhr_mid = yhrMidpoint(t1, t2);
+            yhr_pinch = {
+                dist: yhrDistance(t1, t2),
+                scale: yhr_state.scale,
+                x: yhr_state.x,
+                y: yhr_state.y
+            };
+            // 由“屏幕点 = 中心 + 平移 + 缩放 × (图片点 - 中心)”反解出中点对应的图片坐标
+            yhr_pinch.imgX = yhr_center.x + (yhr_mid.x - yhr_center.x - yhr_state.x) / yhr_state.scale;
+            yhr_pinch.imgY = yhr_center.y + (yhr_mid.y - yhr_center.y - yhr_state.y) / yhr_state.scale;
+        }
+
+        /**
+         * 函数主要实现功能：双指移动时按距离比例缩放，并让两指中点下的图片坐标始终留在中点位置
+         * @param {Touch} t1 - 第一个触点
+         * @param {Touch} t2 - 第二个触点
+         */
+        function yhrMovePinch(t1, t2) {
+            var yhr_dist = yhrDistance(t1, t2);
+            var yhr_mid = yhrMidpoint(t1, t2);
+
+            // 用“起始距离/起始缩放”做整体比例，不做逐帧累乘，避免误差累积造成抖动
+            var yhr_next = yhrClampScale(yhr_pinch.scale * (yhr_dist / yhr_pinch.dist));
+            yhr_state.scale = yhr_next;
+
+            // 平移量由“固定图片坐标 + 当前中点”反推，保证缩放不跳
+            yhr_state.x = yhr_mid.x - yhr_center.x - yhr_next * (yhr_pinch.imgX - yhr_center.x);
+            yhr_state.y = yhr_mid.y - yhr_center.y - yhr_next * (yhr_pinch.imgY - yhr_center.y);
+
+            yhrSetTransform(false);
+        }
+
+        /**
+         * 函数主要实现功能：进入单指状态，记录起始触点与起始平移量
+         * @param {Touch} touch - 当前触点
+         */
+        function yhrStartPan(touch) {
+            yhr_pan = {
+                startX: touch.clientX,
+                startY: touch.clientY,
+                origX: yhr_state.x,
+                origY: yhr_state.y,
+                startTime: Date.now(),
+                moved: false
+            };
+        }
+
+        /**
+         * 函数主要实现功能：单指拖动时按拖动差值移动图片，只在放大状态下生效
+         * @param {Touch} touch - 当前触点
+         */
+        function yhrMovePan(touch) {
+            if (!yhr_pan) {
+                return;
+            }
+            var yhr_dx = touch.clientX - yhr_pan.startX;
+            var yhr_dy = touch.clientY - yhr_pan.startY;
+            // 先记录是否发生过位移，缩放为 1 倍时不移动图片，但也不能把这次拖动误判成点击
+            if (!yhr_pan.moved && Math.sqrt(yhr_dx * yhr_dx + yhr_dy * yhr_dy) > yhr_tapMove) {
+                yhr_pan.moved = true;
+            }
+            if (yhr_state.scale <= yhr_minScale) {
+                return;
+            }
+            // 直接使用“起始平移 + 手指位移”，不再叠加锚点换算，拖动过程稳定跟手
+            yhr_state.x = yhr_pan.origX + yhr_dx;
+            yhr_state.y = yhr_pan.origY + yhr_dy;
+            yhrSetTransform(false);
+        }
+
+        /**
+         * 函数主要实现功能：双击时在 1x 与 2x 之间切换，并以双击点为基准保持该点位置不动
+         * @param {number} stageX - 双击点在容器内的 X 坐标
+         * @param {number} stageY - 双击点在容器内的 Y 坐标
+         */
+        function yhrDoubleTapZoom(stageX, stageY) {
+            var yhr_target = yhr_state.scale > 1.01 ? yhr_minScale : 2;
+            var yhr_oldScale = yhr_state.scale;
+
+            // 先算出双击点对应的图片坐标，切换缩放后再反推平移量
+            var yhr_imgX = yhr_center.x + (stageX - yhr_center.x - yhr_state.x) / yhr_oldScale;
+            var yhr_imgY = yhr_center.y + (stageY - yhr_center.y - yhr_state.y) / yhr_oldScale;
+
+            yhr_state.scale = yhr_target;
+            if (yhr_target === yhr_minScale) {
+                yhr_state.x = 0;
+                yhr_state.y = 0;
+            } else {
+                yhr_state.x = stageX - yhr_center.x - yhr_target * (yhr_imgX - yhr_center.x);
+                yhr_state.y = stageY - yhr_center.y - yhr_target * (yhr_imgY - yhr_center.y);
+                yhrClampPan();
+            }
+            // 双击是程序化切换，带 0.25s 过渡
+            yhrSetTransform(true);
+        }
+
+        /**
+         * 函数主要实现功能：处理 touchstart，按触点数量进入双指或单指状态
+         * @param {TouchEvent} e - 触摸事件对象
+         */
+        function yhrOnTouchStart(e) {
+            yhr_lastTouchTime = Date.now();
+            yhrReadRect();
+
+            if (e.touches.length >= 2) {
+                yhr_pan = null;                       // 双指优先，放弃单指拖动状态
+                yhrStartPinch(e.touches[0], e.touches[1]);
+            } else if (e.touches.length === 1) {
+                yhr_pinch = null;                     // 单指开始，清掉可能残留的双指状态
+                yhr_tapCandidate = true;              // 先假定是单击，位移超阈值后会被排除
+                yhrStartPan(e.touches[0]);
+            }
+        }
+
+        /**
+         * 函数主要实现功能：处理 touchmove，双指缩放或单指拖动
+         * @param {TouchEvent} e - 触摸事件对象
+         */
+        function yhrOnTouchMove(e) {
+            yhr_lastTouchTime = Date.now();
+            if (e.touches.length >= 2 && yhr_pinch) {
+                yhrMovePinch(e.touches[0], e.touches[1]);
+            } else if (e.touches.length === 1 && yhr_pan) {
+                yhrMovePan(e.touches[0]);
+            }
+        }
+
+        /**
+         * 函数主要实现功能：处理 touchend，识别单击/双击，双指退回单指时重建拖动状态，松手后做边界回弹
+         * @param {TouchEvent} e - 触摸事件对象
+         */
+        function yhrOnTouchEnd(e) {
+            yhr_lastTouchTime = Date.now();
+            yhrReadRect();
+
+            // 双指松开一指：用剩余手指重新建立单指拖动基准，避免图片瞬间跳动
+            if (e.touches.length === 1) {
+                yhr_pinch = null;
+                yhr_tapCandidate = false;   // 从双指退回的单指不算点击
+                yhrStartPan(e.touches[0]);
+                yhrClampPan();
+                yhrSetTransform(true);
+                return;
+            }
+
+            if (e.touches.length === 0) {
+                // 判断是否为一次点击：本次手势没有出现过双指、位移小、时间短
+                var yhr_isTap = yhr_tapCandidate && yhr_pan && !yhr_pan.moved &&
+                    (Date.now() - yhr_pan.startTime) <= yhr_tapTime;
+
+                yhr_tapCandidate = false;
+                yhr_pinch = null;
+                yhr_pan = null;
+
+                // 松手后把图片限制在边界内，并带 0.25s 过渡回弹
+                yhrClampPan();
+                yhrSetTransform(true);
+
+                if (yhr_isTap) {
+                    var yhr_point = yhrToStage(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+                    if (yhr_pendingTap && (Date.now() - yhr_pendingTap.time) <= yhr_doubleGap) {
+                        yhr_pendingTap = null;
+                        yhrDoubleTapZoom(yhr_point.x, yhr_point.y);
+                    } else {
+                        yhr_pendingTap = { time: Date.now(), x: yhr_point.x, y: yhr_point.y };
+                    }
+                }
+            }
+        }
+
+        /**
+         * 函数主要实现功能：处理 touchcancel，按松手同样逻辑做边界限制，避免状态卡在缩放半途
+         * @param {TouchEvent} e - 触摸事件对象
+         */
+        function yhrOnTouchCancel(e) {
+            yhrReadRect();
+            yhr_pinch = null;
+            yhr_pan = null;
+            yhr_tapCandidate = false;
+            yhrClampPan();
+            yhrSetTransform(true);
+        }
+
+        /**
+         * 函数主要实现功能：桌面端双击兜底，与触摸双击互斥，方便在没有 Touch 模拟时验证
+         * @param {MouseEvent} e - 鼠标双击事件
+         */
+        function yhrOnDblClick(e) {
+            if (Date.now() - yhr_lastTouchTime < 600) {
+                return;
+            }
+            yhrReadRect();
+            var yhr_point = yhrToStage(e.clientX, e.clientY);
+            yhrDoubleTapZoom(yhr_point.x, yhr_point.y);
+        }
+
+        /**
+         * 函数主要实现功能：屏蔽长按弹出的上下文菜单，防止查看器被系统菜单打断
+         * @param {Event} e - 上下文菜单事件
+         */
+        function yhrOnContextMenu(e) {
+            e.preventDefault();
+        }
+
+        /**
+         * 函数主要实现功能：初始化查看器，绑定触摸与双击事件并输出初始倍数
+         */
+        function yhrInit() {
+            yhr_stage.addEventListener('touchstart', yhrOnTouchStart, { passive: true });
+            yhr_stage.addEventListener('touchmove', yhrOnTouchMove, { passive: true });
+            yhr_stage.addEventListener('touchend', yhrOnTouchEnd, { passive: true });
+            yhr_stage.addEventListener('touchcancel', yhrOnTouchCancel, { passive: true });
+            yhr_stage.addEventListener('dblclick', yhrOnDblClick);
+            yhr_stage.addEventListener('contextmenu', yhrOnContextMenu);
+
+            yhrReadRect();
+            yhrSetTransform(false);
+        }
+
+        yhrInit();
+    })();
+    </script>
+</body>
+</html>

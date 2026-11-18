@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<!--
+=========================================================
+ * 文件名称：touch-probe.html
+ * 作    者：叶浩然
+ * 建立时间：2026-11-18
+ * 大模型：Trae
+ * 功能名称：移动端触摸事件探针页，第 3 节探针区记录 5 种手势的事件触发顺序
+ * =========================================================
+-->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>触摸事件探针 · 手势事件顺序记录</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+            background: #f2f4f6;
+            color: #24303c;
+            padding: 16px 12px 40px;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .wrap {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        /* ========== 页头 ========== */
+        .page-head {
+            padding: 4px 2px 2px;
+        }
+
+        .page-head h1 {
+            font-size: 1.22rem;
+            color: #1f2d3a;
+        }
+
+        .page-head p {
+            margin-top: 6px;
+            font-size: 0.76rem;
+            color: #7c8b98;
+            line-height: 1.6;
+        }
+
+        /* ========== 卡片 ========== */
+        .card {
+            background: #fff;
+            border: 1px solid #e3e8ee;
+            border-radius: 10px;
+            padding: 14px;
+            margin-top: 14px;
+        }
+
+        .card h2 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.98rem;
+            color: #1f2d3a;
+            margin-bottom: 10px;
+        }
+
+        .card h2 span {
+            width: 20px;
+            height: 20px;
+            flex: none;
+            border-radius: 50%;
+            background: #4caf50;
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card p,
+        .card li {
+            font-size: 0.8rem;
+            color: #5b6b7a;
+            line-height: 1.8;
+        }
+
+        .card ol,
+        .card ul {
+            padding-left: 20px;
+        }
+
+        .env {
+            list-style: none;
+            padding-left: 0 !important;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 18px;
+            margin-top: 8px;
+        }
+
+        .env li b {
+            color: #1f7a35;
+        }
+
+        /* ========== 探针区 ========== */
+        .probe {
+            position: relative;
+            height: 230px;
+            border: 2px dashed #9ccc9f;
+            border-radius: 12px;
+            background: linear-gradient(180deg, #f7fbf7, #edf6ed);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px;
+            text-align: center;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .probe.active {
+            border-color: #4caf50;
+            box-shadow: inset 0 0 0 2px rgba(76, 175, 80, 0.14);
+        }
+
+        .probe-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #2e7d32;
+            letter-spacing: 1px;
+        }
+
+        .probe-tip {
+            font-size: 0.74rem;
+            color: #7b8c7c;
+        }
+
+        .probe-state {
+            font-size: 0.72rem;
+            color: #4a5c6a;
+            line-height: 1.8;
+            font-variant-numeric: tabular-nums;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid #dfe9df;
+            border-radius: 8px;
+            padding: 8px 12px;
+            min-width: 220px;
+        }
+
+        /* ========== 实时日志 ========== */
+        .log-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 14px 0 8px;
+            font-size: 0.78rem;
+            color: #4a5c6a;
+            font-weight: 600;
+        }
+
+        .live-log {
+            list-style: none;
+            max-height: 150px;
+            overflow: auto;
+            background: #0f1720;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font: 0.72rem/1.75 Consolas, Menlo, monospace;
+            color: #cfe3d4;
+        }
+
+        .live-log li {
+            display: flex;
+            gap: 8px;
+            font-size: 0.72rem;
+            color: #cfe3d4;
+        }
+
+        .live-log .t { color: #6f8798; width: 54px; flex: none; }
+        .live-log .n { color: #8ee08e; width: 86px; flex: none; }
+        .live-log .d { color: #b9c7d2; }
+
+        /* ========== 记录表 ========== */
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+        }
+
+        th,
+        td {
+            border: 1px solid #e1e7ed;
+            padding: 8px 9px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f6f9f7;
+            color: #3d4b57;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        td:first-child {
+            white-space: nowrap;
+            font-weight: 600;
+            color: #2f3d4a;
+        }
+
+        td.chain {
+            word-break: break-word;
+            color: #55646f;
+        }
+
+        td.note {
+            color: #7c8b98;
+            font-size: 0.74rem;
+        }
+
+        tr.done td {
+            background: #f3fbf4;
+        }
+
+        tr.done td.chain {
+            color: #1f7a35;
+            font-weight: 600;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        button {
+            font: inherit;
+            font-size: 0.78rem;
+            padding: 7px 14px;
+            border-radius: 16px;
+            border: 1px solid #cfd8df;
+            background: #fff;
+            color: #4a5c6a;
+            cursor: pointer;
+        }
+
+        button:active {
+            background: #eef4ef;
+        }
+
+        .toast {
+            margin-top: 10px;
+            font-size: 0.76rem;
+            color: #2e7d32;
+            min-height: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <main class="wrap">
+        <header class="page-head">
+            <h1>触摸事件探针</h1>
+            <p>手机直接打开，或在电脑浏览器按 F12 打开 DevTools → 切换设备模式（需开启 Touch 模拟）后操作。</p>
+        </header>
+
+        <!-- ========== 第 1 节：实验说明 ========== -->
+        <section class="card">
+            <h2><span>1</span>实验说明</h2>
+            <p>在第 3 节探针区内按顺序完成 5 种操作，页面会把本次手势触发的事件顺序自动写入第 4 节的记录表。</p>
+            <ul class="env">
+                <li>触摸支持：<b id="envTouch">检测中…</b></li>
+                <li>最大触点数：<b id="envPoints">-</b></li>
+                <li>事件来源：<b id="envSource">待操作</b></li>
+            </ul>
+        </section>
+
+        <!-- ========== 第 2 节：操作步骤 ========== -->
+        <section class="card">
+            <h2><span>2</span>操作步骤</h2>
+            <ol>
+                <li>单击探针区（轻点后立即抬起）</li>
+                <li>按住后向上拖动约 100px</li>
+                <li>向左快速滑动（短距离、快速）</li>
+                <li>双指同时触摸探针区后一起抬起（可选）</li>
+                <li>长按约 1 秒后抬起</li>
+            </ol>
+        </section>
+
+        <!-- ========== 第 3 节：探针区 ========== -->
+        <section class="card">
+            <h2><span>3</span>探针区</h2>
+            <div class="probe" id="probe">
+                <div class="probe-title">在此区域内操作</div>
+                <div class="probe-tip">按住 • 拖动 • 滑动 • 长按</div>
+                <div class="probe-state" id="probeState">
+                    指数量：0 ｜ 位移：—<br>
+                    时长：— ｜ 事件数：0
+                </div>
+            </div>
+
+            <div class="log-head">
+                <span>实时事件日志（每次手势自动清空重记）</span>
+                <button type="button" id="btnClearLog">清空日志</button>
+            </div>
+            <ul class="live-log" id="liveLog"></ul>
+        </section>
+
+        <!-- ========== 第 4 节：事件记录表 ========== -->
+        <section class="card">
+            <h2><span>4</span>事件触发顺序记录表</h2>
+            <div class="table-wrap">
+                <table id="recordTable">
+                    <thead>
+                        <tr>
+                            <th>操作</th>
+                            <th>事件触发顺序</th>
+                            <th>判定说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-gesture="tap">
+                            <td>单击</td>
+                            <td class="chain">—</td>
+                            <td class="note">—</td>
+                        </tr>
+                        <tr data-gesture="drag-up">
+                            <td>向上拖动</td>
+                            <td class="chain">—</td>
+                            <td class="note">—</td>
+                        </tr>
+                        <tr data-gesture="swipe-left">
+                            <td>向左快速滑</td>
+                            <td class="chain">—</td>
+                            <td class="note">—</td>
+                        </tr>
+                        <tr data-gesture="pinch">
+                            <td>双指触摸（可选）</td>
+                            <td class="chain">—</td>
+                            <td class="note">—</td>
+                        </tr>
+                        <tr data-gesture="longpress">
+                            <td>长按后抬起</td>
+                            <td class="chain">—</td>
+                            <td class="note">—</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="actions">
+                <button type="button" id="btnReset">清空表格</button>
+            </div>
+            <p class="toast" id="toast"></p>
+        </section>
+    </main>
+
+    <script>
+    (function () {
+        'use strict';
+
+        /* ========== 判定阈值 ========== */
+        var LONG_PRESS_MS = 600;      // 判定为长按的按住时长
+        var MOVE_THRESHOLD = 12;      // 移动多少像素后取消长按
+        var DRAG_THRESHOLD = 30;      // 判定为拖动的位移
+        var SWIPE_MIN_DX = 40;        // 判定为快速滑动的水平位移
+        var SWIPE_MAX_MS = 500;       // 判定为快速滑动的最大时长
+        var FINALIZE_DELAY = 450;     // 抬手后等待 click 事件的时长
+        var MAX_LOG_ITEMS = 80;       // 实时日志最多保留条数
+
+        /* ========== DOM 引用 ========== */
+        var probeEl = document.getElementById('probe');
+        var probeStateEl = document.getElementById('probeState');
+        var liveLogEl = document.getElementById('liveLog');
+        var toastEl = document.getElementById('toast');
+        var tableEl = document.getElementById('recordTable');
+        var envTouchEl = document.getElementById('envTouch');
+        var envPointsEl = document.getElementById('envPoints');
+        var envSourceEl = document.getElementById('envSource');
+
+        /* 当前手势状态；null 表示当前没有正在进行或等待收尾的手势 */
+        var gesture = null;
+        /* 最近一次触摸事件的时间，用于忽略浏览器派发的兼容鼠标事件 */
+        var lastTouchTime = 0;
+
+        /**
+         * 函数主要实现功能：返回高精度当前时间，用于计算手势时长与日志时间戳
+         * @returns {number} 毫秒时间戳
+         */
+        function now() {
+            return (window.performance && performance.now) ? performance.now() : Date.now();
+        }
+
+        /**
+         * 函数主要实现功能：开始记录一次新手势，重置起点、时间、触点数量与事件序列
+         * @param {number} x - 起点 X 坐标
+         * @param {number} y - 起点 Y 坐标
+         * @param {string} source - 事件来源，touch 或 mouse
+         */
+        function beginGesture(x, y, source) {
+            if (gesture) {
+                finalizeGesture();
+            }
+            gesture = {
+                source: source,
+                startX: x,
+                startY: y,
+                lastX: x,
+                lastY: y,
+                startTime: now(),
+                endTime: 0,
+                maxTouches: 1,
+                pressed: false,
+                ended: false,
+                longPressFired: false,
+                timer: null,
+                finalizeTimer: null,
+                finalized: false,
+                events: []
+            };
+            // 每次手势重新记录实时日志
+            liveLogEl.innerHTML = '';
+            probeEl.classList.add('active');
+            envSourceEl.textContent = source === 'touch' ? '触摸事件' : '鼠标事件';
+            updateStatePanel();
+        }
+
+        /**
+         * 函数主要实现功能：向当前手势的事件序列追加一条事件，并写入实时日志列表
+         * @param {string} name - 事件名称，如 touchstart
+         * @param {string} detail - 事件细节描述
+         */
+        function logEvent(name, detail) {
+            if (!gesture) {
+                return;
+            }
+            var offset = Math.round(now() - gesture.startTime);
+            gesture.events.push(name);
+
+            var li = document.createElement('li');
+            var s1 = document.createElement('span');
+            var s2 = document.createElement('span');
+            var s3 = document.createElement('span');
+            s1.className = 't';
+            s2.className = 'n';
+            s3.className = 'd';
+            s1.textContent = '+' + offset + 'ms';
+            s2.textContent = name;
+            s3.textContent = detail || '';
+            li.appendChild(s1);
+            li.appendChild(s2);
+            li.appendChild(s3);
+            liveLogEl.appendChild(li);
+
+            while (liveLogEl.children.length > MAX_LOG_ITEMS) {
+                liveLogEl.removeChild(liveLogEl.firstChild);
+            }
+            liveLogEl.scrollTop = liveLogEl.scrollHeight;
+            updateStatePanel();
+        }
+
+        /**
+         * 函数主要实现功能：刷新探针区内的状态面板，显示指数量、位移、时长和事件数
+         */
+        function updateStatePanel() {
+            if (!gesture) {
+                probeStateEl.innerHTML = '指数量：0 ｜ 位移：—<br>时长：— ｜ 事件数：0';
+                return;
+            }
+            var dx = Math.round(gesture.lastX - gesture.startX);
+            var dy = Math.round(gesture.lastY - gesture.startY);
+            var duration = Math.round((gesture.endTime || now()) - gesture.startTime);
+            probeStateEl.innerHTML =
+                '指数量：' + gesture.maxTouches + ' ｜ 位移：Δx=' + dx + '，Δy=' + dy + '<br>' +
+                '时长：' + duration + 'ms ｜ 事件数：' + gesture.events.length;
+        }
+
+        /**
+         * 函数主要实现功能：启动长按计时器，按满阈值且几乎未移动时补记一条 longpress 事件
+         */
+        function startLongPressTimer() {
+            if (!gesture) {
+                return;
+            }
+            clearTimeout(gesture.timer);
+            gesture.timer = setTimeout(function () {
+                if (!gesture || gesture.ended || gesture.longPressFired) {
+                    return;
+                }
+                var dx = gesture.lastX - gesture.startX;
+                var dy = gesture.lastY - gesture.startY;
+                if (Math.sqrt(dx * dx + dy * dy) < MOVE_THRESHOLD) {
+                    gesture.longPressFired = true;
+                    logEvent('longpress', '按住 ≥' + LONG_PRESS_MS + 'ms');
+                }
+            }, LONG_PRESS_MS);
+        }
+
+        /**
+         * 函数主要实现功能：在抬手后延迟收尾，留出时间把随后派发的 click 事件一起记入序列
+         */
+        function scheduleFinalize() {
+            if (!gesture) {
+                return;
+            }
+            clearTimeout(gesture.finalizeTimer);
+            gesture.finalizeTimer = setTimeout(finalizeGesture, FINALIZE_DELAY);
+        }
+
+        /**
+         * 函数主要实现功能：根据位移、时长、指数量与长按标记判断手势类型
+         * @param {Object} g - 手势状态对象
+         * @returns {Object} 含 key（表格行标识）与 note（判定说明）的结果
+         */
+        function classifyGesture(g) {
+            var dx = g.lastX - g.startX;
+            var dy = g.lastY - g.startY;
+            var distance = Math.sqrt(dx * dx + dy * dy);
+            var duration = g.endTime - g.startTime;
+            var note = 'Δx=' + Math.round(dx) + '，Δy=' + Math.round(dy) +
+                '，时长 ' + Math.round(duration) + 'ms，' + g.maxTouches + ' 指';
+
+            if (g.maxTouches >= 2) {
+                return { key: 'pinch', note: '同时触摸 ' + g.maxTouches + ' 指；' + note };
+            }
+            if (g.longPressFired) {
+                return { key: 'longpress', note: '按住 ≥' + LONG_PRESS_MS + 'ms 未移动；' + note };
+            }
+            if (dx <= -SWIPE_MIN_DX && Math.abs(dx) > Math.abs(dy) && duration <= SWIPE_MAX_MS) {
+                return { key: 'swipe-left', note: '左向位移较大且时长较短；' + note };
+            }
+            if (dy <= -DRAG_THRESHOLD && Math.abs(dy) >= Math.abs(dx)) {
+                return { key: 'drag-up', note: '纵向向上位移占优；' + note };
+            }
+            if (distance <= MOVE_THRESHOLD && duration < LONG_PRESS_MS) {
+                return { key: 'tap', note: '位移很小且时长较短；' + note };
+            }
+            return { key: '', note: '未命中 5 种手势的判定条件；' + note };
+        }
+
+        /**
+         * 函数主要实现功能：把事件名数组压缩为“事件 → 事件 ×次数”的可读顺序串
+         * @param {Array<string>} events - 事件名序列
+         * @returns {string} 事件触发顺序文本
+         */
+        function buildChain(events) {
+            if (!events.length) {
+                return '—';
+            }
+            var parts = [];
+            var current = events[0];
+            var count = 1;
+            for (var i = 1; i < events.length; i++) {
+                if (events[i] === current) {
+                    count++;
+                } else {
+                    parts.push(count > 1 ? current + ' ×' + count : current);
+                    current = events[i];
+                    count = 1;
+                }
+            }
+            parts.push(count > 1 ? current + ' ×' + count : current);
+            return parts.join(' → ');
+        }
+
+        /**
+         * 函数主要实现功能：结束当前手势，判定类型并把事件顺序写入记录表对应行
+         */
+        function finalizeGesture() {
+            if (!gesture || gesture.finalized) {
+                return;
+            }
+            gesture.finalized = true;
+            clearTimeout(gesture.timer);
+            clearTimeout(gesture.finalizeTimer);
+            if (!gesture.endTime) {
+                gesture.endTime = now();
+            }
+
+            var result = classifyGesture(gesture);
+            var chain = buildChain(gesture.events);
+            var row = result.key ? tableEl.querySelector('tr[data-gesture="' + result.key + '"]') : null;
+
+            if (row) {
+                row.children[1].textContent = chain;
+                row.children[2].textContent = result.note;
+                row.classList.add('done');
+                showToast('已记录到「' + row.children[0].textContent.trim() + '」行：' + chain);
+            } else {
+                showToast('本次操作未归入 5 种手势之一：' + result.note);
+            }
+
+            probeEl.classList.remove('active');
+            gesture = null;
+            updateStatePanel();
+        }
+
+        /**
+         * 函数主要实现功能：在记录表下方显示一条操作提示信息
+         * @param {string} text - 提示文本
+         */
+        function showToast(text) {
+            toastEl.textContent = text;
+        }
+
+        /* ================= 触摸事件 ================= */
+
+        /**
+         * 函数主要实现功能：处理手指按下，开始新手势并记录 touchstart
+         * @param {TouchEvent} e - 触摸事件对象
+         */
+        function onTouchStart(e) {
+            lastTouchTime = Date.now();
+            var touch = e.touches[0];
+            if (!touch) {
+                return;
+            }
+            if (!gesture || gesture.ended) {
+                beginGesture(touch.clientX, touch.clientY, 'touch');
+            }
+            if (e.touches.length > gesture.maxTouches) {
+                gesture.maxTouches = e.touches.length;
+            }
+            gesture.lastX = touch.clientX;
+            gesture.lastY = touch.clientY;
+            logEvent('touchstart', e.touches.length + ' 指 @(' +
+                Math.round(touch.clientX) + ',' + Math.round(touch.clientY) + ')');
+            startLongPressTimer();
+        }
+
+        /**
+         * 函数主要实现功能：处理手指移动，记录 touchmove 并在移动超过阈值时取消长按判定
+         * @param {TouchEvent} e - 触摸事件对象
+         */
+        function onTouchMove(e) {
+            lastTouchTime = Date.now();
+            if (!gesture || !e.touches.length) {
+                return;
+            }
+            gesture.lastX = e.touches[0].clientX;
+            gesture.lastY = e.touches[0].clientY;
+            var dx = gesture.lastX - gesture.startX;
+            var dy = gesture.lastY - gesture.startY;
+            if (!gesture.longPressFired && Math.sqrt(dx * dx + dy * dy) >= MOVE_THRESHOLD) {
+                clearTimeout(gesture.timer);
+            }
+            logEvent('touchmove', 'Δ(' + Math.round(dx) + ',' + Math.round(dy) + ')');
+        }
+
+        /**
+         * 函数主要实现功能：处理手指抬起，记录 touchend 并在全部离开后安排收尾
+         * @param {TouchEvent} e - 触摸事件对象
+         */
+        function onTouchEnd(e) {
+            lastTouchTime = Date.now();
+            if (!gesture) {
+                return;
+            }
+            clearTimeout(gesture.timer);
+            if (e.touches.length === 0) {
+                gesture.ended = true;
+                gesture.endTime = now();
+                logEvent('touchend', '全部抬起');
+                scheduleFinalize();
+            } else {
+                logEvent('touchend', '剩余 ' + e.touches.length + ' 指');
+            }
+        }
+
+        /**
+         * 函数主要实现功能：处理触摸被系统取消的情况，记录 touchcancel 并立即收尾
+         * @param {TouchEvent} e - 触摸事件对象
+         */
+        function onTouchCancel(e) {
+            if (!gesture) {
+                return;
+            }
+            gesture.ended = true;
+            gesture.endTime = now();
+            logEvent('touchcancel', '系统取消');
+            finalizeGesture();
+        }
+
+        /* ================= 鼠标事件（DevTools 非触摸模拟时可用） ================= */
+
+        /**
+         * 函数主要实现功能：处理鼠标按下，忽略触摸产生的兼容鼠标事件后开始新手势
+         * @param {MouseEvent} e - 鼠标事件对象
+         */
+        function onMouseDown(e) {
+            if (Date.now() - lastTouchTime < 1000 || e.button !== 0) {
+                return;
+            }
+            beginGesture(e.clientX, e.clientY, 'mouse');
+            gesture.pressed = true;
+            logEvent('mousedown', '左键 @(' + Math.round(e.clientX) + ',' + Math.round(e.clientY) + ')');
+            startLongPressTimer();
+        }
+
+        /**
+         * 函数主要实现功能：处理按住过程中的鼠标移动，记录 mousemove 并取消长按判定
+         * @param {MouseEvent} e - 鼠标事件对象
+         */
+        function onMouseMove(e) {
+            if (!gesture || gesture.source !== 'mouse' || !gesture.pressed) {
+                return;
+            }
+            gesture.lastX = e.clientX;
+            gesture.lastY = e.clientY;
+            var dx = gesture.lastX - gesture.startX;
+            var dy = gesture.lastY - gesture.startY;
+            if (!gesture.longPressFired && Math.sqrt(dx * dx + dy * dy) >= MOVE_THRESHOLD) {
+                clearTimeout(gesture.timer);
+            }
+            logEvent('mousemove', 'Δ(' + Math.round(dx) + ',' + Math.round(dy) + ')');
+        }
+
+        /**
+         * 函数主要实现功能：处理鼠标抬起，记录 mouseup 并在随后等待 click 一起收尾
+         * @param {MouseEvent} e - 鼠标事件对象
+         */
+        function onMouseUp(e) {
+            if (!gesture || gesture.source !== 'mouse' || !gesture.pressed) {
+                return;
+            }
+            gesture.pressed = false;
+            gesture.ended = true;
+            gesture.endTime = now();
+            gesture.lastX = e.clientX;
+            gesture.lastY = e.clientY;
+            clearTimeout(gesture.timer);
+            logEvent('mouseup', '抬起');
+            scheduleFinalize();
+        }
+
+        /**
+         * 函数主要实现功能：记录 click 事件，并在抬手后立即完成本次手势的收尾
+         * @param {MouseEvent} e - 鼠标事件对象
+         */
+        function onClick(e) {
+            if (!gesture) {
+                return;
+            }
+            if (gesture.ended) {
+                clearTimeout(gesture.finalizeTimer);
+                logEvent('click', '@(' + Math.round(e.clientX) + ',' + Math.round(e.clientY) + ')');
+                finalizeGesture();
+            } else {
+                logEvent('click', '');
+            }
+        }
+
+        /**
+         * 函数主要实现功能：长按结束时屏蔽浏览器右键菜单，保证手势记录不被打断
+         * @param {Event} e - 上下文菜单事件
+         */
+        function onContextMenu(e) {
+            e.preventDefault();
+        }
+
+        /* ================= 绑定事件与初始化 ================= */
+
+        /**
+         * 函数主要实现功能：绑定探针区的触摸、鼠标与点击事件，并输出设备触摸能力
+         */
+        function init() {
+            probeEl.addEventListener('touchstart', onTouchStart, { passive: true });
+            probeEl.addEventListener('touchmove', onTouchMove, { passive: true });
+            probeEl.addEventListener('touchend', onTouchEnd, { passive: true });
+            probeEl.addEventListener('touchcancel', onTouchCancel, { passive: true });
+
+            probeEl.addEventListener('mousedown', onMouseDown);
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+            probeEl.addEventListener('click', onClick);
+            probeEl.addEventListener('contextmenu', onContextMenu);
+
+            document.getElementById('btnClearLog').addEventListener('click', function (e) {
+                e.stopPropagation();
+                liveLogEl.innerHTML = '';
+            });
+
+            document.getElementById('btnReset').addEventListener('click', function (e) {
+                e.stopPropagation();
+                var rows = tableEl.querySelectorAll('tbody tr');
+                for (var i = 0; i < rows.length; i++) {
+                    rows[i].classList.remove('done');
+                    rows[i].children[1].textContent = '—';
+                    rows[i].children[2].textContent = '—';
+                }
+                toastEl.textContent = '记录表已清空。';
+                probeEl.classList.remove('active');
+                gesture = null;
+                liveLogEl.innerHTML = '';
+                updateStatePanel();
+            });
+
+            var hasTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+            envTouchEl.textContent = hasTouch ? '支持' : '不支持（可用鼠标，或在 DevTools 开启 Touch）';
+            envPointsEl.textContent = (navigator.maxTouchPoints || 0) + ' 点';
+            updateStatePanel();
+        }
+
+        init();
+    })();
+    </script>
+</body>
+</html>
