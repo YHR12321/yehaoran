@@ -1,518 +1,291 @@
 <!DOCTYPE html>
+<!--
+=========================================================
+ * 文件名称：index.html
+ * 作    者：叶浩然
+ * 学    号：24002120407
+ * 建立时间：2026-11-18
+ * 大模型：Trae
+ * 功能名称：个人作业首页（汇总移动端交互任务与课堂练习页面入口）
+ * =========================================================
+-->
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>文学社科 - 图书分类</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>叶浩然的作业首页 · 高级网页设计</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23667eea'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='sans-serif'>Y</text></svg>">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
-            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
-            background: #f5f5f5;
-            color: #333;
-            padding: 24px 16px;
-        }
-
-        .page {
-            width: min(1080px, 100%);
-            margin: 0 auto;
-            background: #fff;
-            border: 1px solid #e8e8e8;
-        }
-
-        /* ========== 顶部标题 ========== */
-        .page-header {
-            padding: 14px 22px;
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #333;
-            border-bottom: 1px solid #4caf50;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* 顶部导航链接 */
-        .page-nav-link {
-            font-size: 0.82rem;
-            font-weight: 500;
-            color: #4caf50;
-            text-decoration: none;
-        }
-
-        .page-nav-link:hover { text-decoration: underline; }
-
-        /* ========== 主体三栏布局 ========== */
-        .page-body {
-            display: flex;
-            padding: 18px 22px 24px;
-            gap: 20px;
-        }
-
-        /* ========== 左侧：主编推荐 ========== */
-        .aside {
-            width: 210px;
-            flex-shrink: 0;
-        }
-
-        .aside-title {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: #333;
-            padding: 8px 0;
-            border-bottom: 2px solid #333;
-            margin-bottom: 16px;
-        }
-
-        /* 封面卡片 */
-        .recommend-card {
-            position: relative;
-            width: 160px;
-            margin: 0 auto 16px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-        }
-
-        .recommend-cover {
-            width: 100%;
-            height: 220px;
-            background: linear-gradient(135deg, #4a5568 0%, #2d3748 60%, #1a202c 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-            padding-bottom: 18px;
-            color: #fff;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .recommend-cover::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background:
-                radial-gradient(circle at 30% 30%, rgba(255,255,255,0.12), transparent 50%),
-                radial-gradient(circle at 70% 70%, rgba(255,255,255,0.08), transparent 40%);
-        }
-
-        .recommend-cover .book-title-zh {
-            font-size: 1.35rem;
-            font-weight: 700;
-            letter-spacing: 6px;
-            margin-bottom: 4px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .recommend-cover .book-title-sub {
-            font-size: 0.62rem;
-            letter-spacing: 2px;
-            color: rgba(255,255,255,0.55);
-            position: relative;
-            z-index: 1;
-        }
-
-        /* 力荐 角标 */
-        .badge-recommend {
-            position: absolute;
-            top: -4px;
-            left: -4px;
-            background: #4caf50;
-            color: #fff;
-            font-size: 0.72rem;
-            font-weight: 700;
-            padding: 4px 8px;
-            z-index: 2;
-        }
-
-        .badge-recommend::after {
-            content: "";
-            position: absolute;
-            right: -6px;
-            bottom: 0;
-            width: 0;
-            height: 0;
-            border-left: 6px solid #2e7d32;
-            border-bottom: 6px solid transparent;
-        }
-
-        /* 书籍信息 */
-        .book-info h4 {
-            font-size: 0.95rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: #222;
-        }
-
-        .book-info .book-desc {
-            font-size: 0.78rem;
-            color: #666;
-            line-height: 1.7;
-            margin-bottom: 14px;
-            text-align: justify;
-        }
-
-        .book-info .book-more {
-            font-size: 0.78rem;
-            color: #999;
-            margin-bottom: 16px;
-        }
-
-        .related-list {
-            list-style: none;
-        }
-
-        .related-list li {
-            font-size: 0.78rem;
-            color: #555;
-            padding: 5px 0;
-            padding-left: 12px;
-            position: relative;
-            border-bottom: 1px dotted #e5e5e5;
-        }
-
-        .related-list li:last-child { border-bottom: none; }
-
-        .related-list li::before {
-            content: "◆";
-            position: absolute;
-            left: 0;
-            top: 6px;
-            font-size: 0.55rem;
-            color: #4caf50;
-        }
-
-        /* ========== 右侧主区域 ========== */
-        .main {
-            flex: 1;
-            min-width: 0;
-        }
-
-        /* Tab 导航 */
-        .tab-nav {
-            display: flex;
-            border-bottom: 2px solid #e5e5e5;
-            margin-bottom: 18px;
-        }
-
-        .tab-item {
-            padding: 10px 18px;
-            font-size: 0.95rem;
-            color: #888;
-            cursor: pointer;
-            font-weight: 500;
-            position: relative;
-            transition: color 0.2s;
-        }
-
-        .tab-item:hover { color: #333; }
-
-        .tab-item.active {
-            color: #333;
-            font-weight: 700;
-        }
-
-        .tab-item.active::after {
-            content: "";
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #4caf50;
-        }
-
-        /* Tab 面板：左网格 + 右订阅榜 */
-        .tab-panel {
-            display: none;
-        }
-
-        .tab-panel.active {
-            display: flex;
-            gap: 24px;
-        }
-
-        /* 图书网格 */
-        .book-grid {
-            flex: 1;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 14px;
-        }
-
-        .book-item {
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .book-item:hover { transform: translateY(-3px); }
-
-        .book-cover {
-            width: 100%;
-            aspect-ratio: 3 / 4;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-            margin-bottom: 8px;
-            position: relative;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #fff;
-            font-weight: 700;
-            font-size: 0.9rem;
-            padding: 6px;
-            line-height: 1.3;
-            text-align: center;
-            flex-direction: column;
-        }
-
-        .book-cover .cover-sub {
-            font-size: 0.6rem;
-            font-weight: 400;
-            color: rgba(255,255,255,0.75);
-            margin-top: 3px;
-        }
-
-        .book-title {
-            font-size: 0.82rem;
+            padding: 32px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
             color: #333;
-            margin-bottom: 4px;
-            line-height: 1.4;
         }
 
-        .book-price {
-            font-size: 0.82rem;
-            color: #e4393c;
+        /* ========== 主卡片 ========== */
+        .yhr_card {
+            width: 100%;
+            max-width: 760px;
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px 44px 30px;
+        }
+
+        /* ========== 头部个人信息 ========== */
+        .yhr_profile {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #eef0f4;
+        }
+
+        .yhr_avatar {
+            width: 58px;
+            height: 58px;
+            flex: 0 0 58px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 1px;
+        }
+
+        .yhr_name {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #222c38;
+        }
+
+        .yhr_meta {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: #7c8b98;
+            letter-spacing: 0.5px;
+        }
+
+        /* ========== 分区标题 ========== */
+        .yhr_section {
+            margin-top: 28px;
+        }
+
+        .yhr_section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #2b3a4a;
+        }
+
+        .yhr_section-title::before {
+            content: "";
+            width: 4px;
+            height: 16px;
+            border-radius: 2px;
+            background: linear-gradient(180deg, #667eea, #764ba2);
+        }
+
+        .yhr_section-desc {
+            margin-top: 6px;
+            margin-bottom: 14px;
+            font-size: 0.76rem;
+            color: #8b98a4;
+        }
+
+        /* ========== 任务卡片 ========== */
+        .yhr_grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        .yhr_item {
+            display: block;
+            padding: 16px 18px;
+            border: 1px solid #e8ecf2;
+            border-radius: 12px;
+            background: #fff;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .yhr_item:hover {
+            transform: translateY(-3px);
+            border-color: #c7d0fb;
+            box-shadow: 0 10px 24px rgba(102, 126, 234, 0.18);
+        }
+
+        .yhr_item-no {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #667eea;
+            background: #eef1fe;
+            border-radius: 6px;
+            padding: 2px 8px;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .yhr_item-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #26313c;
+        }
+
+        .yhr_item-desc {
+            margin-top: 6px;
+            font-size: 0.74rem;
+            line-height: 1.7;
+            color: #8b98a4;
+        }
+
+        .yhr_arrow {
+            margin-top: 10px;
+            font-size: 0.72rem;
+            color: #667eea;
             font-weight: 600;
         }
 
-        /* 各种书籍封面配色 — 模拟不同风格封面 */
-        .c1 { background: linear-gradient(160deg, #c0392b, #7b241c); }
-        .c2 { background: linear-gradient(160deg, #16a085, #0e6655); }
-        .c3 { background: linear-gradient(160deg, #f39c12, #d35400); }
-        .c4 { background: linear-gradient(160deg, #2c3e50, #1a252f); }
-        .c5 { background: linear-gradient(160deg, #8e44ad, #5b2c6f); }
-        .c6 { background: linear-gradient(160deg, #d4ac0d, #9a7d0a); color: #333; }
-        .c7 { background: linear-gradient(160deg, #1a5276, #0d2b45); }
-        .c8 { background: linear-gradient(160deg, #5d6d7e, #2c3e50); }
-        .c9 { background: linear-gradient(160deg, #b03a2e, #7b241c); }
-        .c10 { background: linear-gradient(160deg, #196f3d, #0e3b21); }
-        .c11 { background: linear-gradient(160deg, #78281f, #4a1812); }
-        .c12 { background: linear-gradient(160deg, #6e2f7d, #3e1a46); }
-        .c13 { background: linear-gradient(160deg, #2874a6, #1a4a6e); }
-        .c14 { background: linear-gradient(160deg, #f5b041, #b9770e); color: #333; }
-        .c15 { background: linear-gradient(160deg, #7b7d7d, #4a4a4a); }
-        .c16 { background: linear-gradient(160deg, #c0392b, #922b21); }
-
-        /* ========== 订阅榜 ========== */
-        .rank-box {
-            width: 180px;
-            flex-shrink: 0;
-        }
-
-        .rank-title {
-            font-size: 0.95rem;
-            font-weight: 700;
-            padding: 8px 0;
-            border-bottom: 2px solid #333;
-            margin-bottom: 14px;
-        }
-
-        .rank-list {
+        /* ========== 普通链接列表 ========== */
+        .yhr_list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
             list-style: none;
-            counter-reset: rank;
         }
 
-        .rank-list li {
-            font-size: 0.78rem;
-            color: #444;
-            padding: 7px 0;
-            position: relative;
-            padding-left: 22px;
-            border-bottom: 1px dotted #eee;
-            cursor: pointer;
-            transition: color 0.2s;
+        .yhr_list a {
+            display: inline-block;
+            padding: 9px 16px;
+            font-size: 0.8rem;
+            color: #4a5a6a;
+            background: #f6f8fb;
+            border: 1px solid #e8ecf2;
+            border-radius: 20px;
+            text-decoration: none;
+            transition: color 0.2s, border-color 0.2s, background 0.2s;
         }
 
-        .rank-list li:hover { color: #e4393c; }
+        .yhr_list a:hover {
+            color: #fff;
+            background: #667eea;
+            border-color: #667eea;
+        }
 
-        .rank-list li::before {
-            counter-increment: rank;
-            content: counter(rank);
-            position: absolute;
-            left: 0;
-            top: 7px;
-            width: 16px;
-            height: 16px;
+        /* ========== 页脚 ========== */
+        .yhr_footer {
+            margin-top: 30px;
+            padding-top: 16px;
+            border-top: 1px solid #eef0f4;
             text-align: center;
             font-size: 0.72rem;
-            font-weight: 700;
-            color: #999;
-            line-height: 16px;
+            color: #a3aeba;
+            letter-spacing: 0.5px;
         }
 
-        /* ========== 响应式 ========== */
-        @media (max-width: 860px) {
-            .page-body { flex-direction: column; }
-            .aside { width: 100%; }
-            .recommend-card { float: left; margin: 0 16px 16px 0; }
-            .tab-panel.active { flex-direction: column; }
-            .rank-box { width: 100%; }
-            .rank-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 16px; }
-        }
+        /* ========== 小屏适配 ========== */
+        @media (max-width: 640px) {
+            body {
+                align-items: flex-start;
+                padding: 18px 12px 28px;
+            }
 
-        @media (max-width: 560px) {
-            .book-grid { grid-template-columns: repeat(2, 1fr); }
-            .aside { clear: both; }
-            .recommend-card { float: none; margin: 0 auto 16px; }
+            .yhr_card {
+                padding: 26px 20px 22px;
+                border-radius: 16px;
+            }
+
+            .yhr_grid {
+                grid-template-columns: 1fr;
+            }
+
+            .yhr_name {
+                font-size: 1.15rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="page">
-        <header class="page-header">
-            <span>文学社科</span>
-            <a class="page-nav-link" href="swiper-task.html">Swiper 课堂任务 →</a>
+    <main class="yhr_card">
+        <!-- 个人信息 -->
+        <header class="yhr_profile">
+            <div class="yhr_avatar">叶</div>
+            <div>
+                <h1 class="yhr_name">叶浩然</h1>
+                <p class="yhr_meta">学号 24002120407 · 高级网页设计 · 2026-2027-1</p>
+            </div>
         </header>
 
-        <div class="page-body">
-            <!-- ========== 左侧：主编推荐 ========== -->
-            <aside class="aside">
-                <div class="aside-title">主编推荐</div>
+        <!-- 移动端交互任务 -->
+        <section class="yhr_section">
+            <h2 class="yhr_section-title">移动端交互任务</h2>
+            <p class="yhr_section-desc">建议用手机打开，或在浏览器 DevTools 设备模式下体验</p>
 
-                <div class="recommend-card">
-                    <div class="recommend-cover">
-                        <div class="book-title-zh">虚实之间</div>
-                        <div class="book-title-sub">BETWEEN FACT AND FICTION</div>
-                    </div>
-                    <div class="badge-recommend">★力荐</div>
-                </div>
+            <div class="yhr_grid">
+                <a class="yhr_item" href="touch-probe.html">
+                    <span class="yhr_item-no">任务一</span>
+                    <div class="yhr_item-title">触摸事件探针</div>
+                    <p class="yhr_item-desc">依次完成单击、拖动、快速滑、双指、长按，自动记录事件触发顺序</p>
+                    <p class="yhr_arrow">打开页面 →</p>
+                </a>
 
-                <div class="book-info">
-                    <h4>芮成钢：《虚实之间》</h4>
-                    <p class="book-desc">
-                        有十年记者生涯对东西方文化的洞悉，又有与奥巴马等政要零距离接触...
-                    </p>
-                    <p class="book-more">更多 »</p>
+                <a class="yhr_item" href="mobile-gesture.html">
+                    <span class="yhr_item-no">任务二</span>
+                    <div class="yhr_item-title">美食卡片滑动</div>
+                    <p class="yhr_item-desc">左右滑动切换四道菜，40px 阈值、边界提示与 300ms 冷却</p>
+                    <p class="yhr_arrow">打开页面 →</p>
+                </a>
 
-                    <ul class="related-list">
-                        <li>兄弟我在义乌的发财史</li>
-                        <li>读佛即是拜佛：唐僧传</li>
-                        <li>二战苏联随军装备录</li>
-                        <li>（更多）</li>
-                    </ul>
-                </div>
-            </aside>
+                <a class="yhr_item" href="mobile-zoom.html">
+                    <span class="yhr_item-no">任务三</span>
+                    <div class="yhr_item-title">图片查看器</div>
+                    <p class="yhr_item-desc">双指缩放 1~4 倍、单指拖动、双击在 1x 与 2x 之间切换</p>
+                    <p class="yhr_arrow">打开页面 →</p>
+                </a>
 
-            <!-- ========== 右侧主区域 ========== -->
-            <section class="main">
-                <!-- Tab 导航 -->
-                <nav class="tab-nav">
-                    <div class="tab-item active">流行小说</div>
-                    <div class="tab-item">社科历史</div>
-                    <div class="tab-item">文学艺术</div>
-                </nav>
+                <a class="yhr_item" href="mobile-sensor.html">
+                    <span class="yhr_item-no">任务四</span>
+                    <div class="yhr_item-title">摇一摇抽菜谱</div>
+                    <p class="yhr_item-desc">监听 devicemotion 检测摇动，抽取今日菜谱，附降级按钮</p>
+                    <p class="yhr_arrow">打开页面 →</p>
+                </a>
+            </div>
+        </section>
 
-                <!-- Tab 1: 流行小说 -->
-                <div class="tab-panel active">
-                    <div class="book-grid">
-                        <div class="book-item"><div class="book-cover c1"><div>省长的<br>女婿</div></div><div class="book-title">省长的女婿</div><div class="book-price">¥ 5.98</div></div>
-                        <div class="book-item"><div class="book-cover c2"><div>致青春</div><div class="cover-sub">SO YOUNG</div></div><div class="book-title">辛夷坞：致青春</div><div class="book-price">¥ 5.00</div></div>
-                        <div class="book-item"><div class="book-cover c3"><div>越位</div><div class="cover-sub">OFFSIDE</div></div><div class="book-title">越位</div><div class="book-price">¥ 2.99</div></div>
-                        <div class="book-item"><div class="book-cover c4"><div>扫黑</div><div class="cover-sub">CRACKDOWN</div></div><div class="book-title">扫黑</div><div class="book-price">¥ 6.40</div></div>
-                        <div class="book-item"><div class="book-cover c5"><div>我的帝王生涯</div></div><div class="book-title">我的帝王生涯</div><div class="book-price">¥ 4.00</div></div>
-                        <div class="book-item"><div class="book-cover c6"><div>南北调书记</div></div><div class="book-title">南北调书记</div><div class="book-price">¥ 5.98</div></div>
-                        <div class="book-item"><div class="book-cover c7"><div>1/14 第一季</div><div class="cover-sub">THE GAME MUST GO ON</div></div><div class="book-title">1/14 第一季</div><div class="book-price">¥ 4.00</div></div>
-                        <div class="book-item"><div class="book-cover c8"><div>辛夷坞：原来</div></div><div class="book-title">辛夷坞：原来</div><div class="book-price">¥ 4.50</div></div>
-                    </div>
-                    <div class="rank-box">
-                        <div class="rank-title">流行小说订阅榜</div>
-                        <ol class="rank-list">
-                            <li>山西煤老板（全文）</li>
-                            <li>你不可不知的人性（全二）</li>
-                            <li>到爱的距离</li>
-                            <li>梅雨的季节（全文）</li>
-                            <li>大清相国（全文）</li>
-                            <li>借势（全文）</li>
-                            <li>省委班子2</li>
-                            <li>静水流深（全文）</li>
-                            <li>生死疲劳（全文）</li>
-                            <li>金瓶梅（全文）</li>
-                        </ol>
-                    </div>
-                </div>
+        <!-- 课堂练习 -->
+        <section class="yhr_section">
+            <h2 class="yhr_section-title">课堂练习</h2>
+            <p class="yhr_section-desc">课程中完成的组件与布局练习</p>
 
-                <!-- Tab 2: 社科历史 -->
-                <div class="tab-panel">
-                    <div class="book-grid">
-                        <div class="book-item"><div class="book-cover c9"><div>奋斗的<br>仕途</div></div><div class="book-title">奋斗的仕途</div><div class="book-price">¥ 3.00</div></div>
-                        <div class="book-item"><div class="book-cover c10"><div>历史选择了<br>邓小平</div></div><div class="book-title">历史选择邓小平</div><div class="book-price">¥ 6.00</div></div>
-                        <div class="book-item"><div class="book-cover c11"><div>钱穆看<br>中国文化</div></div><div class="book-title">钱穆看中国文化</div><div class="book-price">¥ 8.00</div></div>
-                        <div class="book-item"><div class="book-cover c12"><div>刺杀林肯</div><div class="cover-sub">THE LINCOLN ASSASSINATION</div></div><div class="book-title">刺杀林肯</div><div class="book-price">¥ 3.00</div></div>
-                        <div class="book-item"><div class="book-cover c13"><div>资本论</div><div class="cover-sub">DAS KAPITAL</div></div><div class="book-title">资本论</div><div class="book-price">¥ 3.00</div></div>
-                        <div class="book-item"><div class="book-cover c14"><div>为什么是<br>朱元璋</div></div><div class="book-title">为什么是朱元璋</div><div class="book-price">¥ 4.00</div></div>
-                        <div class="book-item"><div class="book-cover c15"><div>阎崇年：<br>大故宫</div></div><div class="book-title">阎崇年：大故宫</div><div class="book-price">¥ 5.00</div></div>
-                        <div class="book-item"><div class="book-cover c16"><div>皇后隐历史</div></div><div class="book-title">皇后隐历史</div><div class="book-price">¥ 4.00</div></div>
-                    </div>
-                    <div class="rank-box">
-                        <div class="rank-title">社科历史订阅榜</div>
-                        <ol class="rank-list">
-                            <li>博弈与社会（全文）</li>
-                            <li>激荡三十年·中国企业</li>
-                            <li>我承认我不曾历经沧桑</li>
-                            <li>吴敬琏传（全文）</li>
-                            <li>世界因你不同：李开复自传</li>
-                            <li>我们台湾这些年（全文）</li>
-                            <li>课本上不说的历史</li>
-                            <li>重口味心理学</li>
-                            <li>微表情心理学</li>
-                            <li>法网冠军李娜自传</li>
-                        </ol>
-                    </div>
-                </div>
+            <ul class="yhr_list">
+                <li><a href="swiper-task.html">Swiper 轮播任务</a></li>
+                <li><a href="tab-news.html">新闻 Tab 选项卡</a></li>
+                <li><a href="tushuwenjian.html">图书分类页</a></li>
+                <li><a href="svg.html">SVG 图标</a></li>
+                <li><a href="review-flex.html">布局复习</a></li>
+            </ul>
+        </section>
 
-                <!-- Tab 3: 文学艺术 -->
-                <div class="tab-panel">
-                    <div class="book-grid">
-                        <div class="book-item"><div class="book-cover c1"><div>武昌城</div></div><div class="book-title">武昌城</div><div class="book-price">¥ 4.50</div></div>
-                        <div class="book-item"><div class="book-cover c8"><div>贾平凹<br>作品选</div></div><div class="book-title">贾平凹作品选</div><div class="book-price">¥ 3.00</div></div>
-                        <div class="book-item"><div class="book-cover c7"><div>最后一个<br>匈奴</div></div><div class="book-title">最后一个匈奴</div><div class="book-price">¥ 4.00</div></div>
-                        <div class="book-item"><div class="book-cover c6"><div>岁月与性情</div></div><div class="book-title">岁月与性情</div><div class="book-price">¥ 8.00</div></div>
-                        <div class="book-item"><div class="book-cover c2"><div>浮生六记</div></div><div class="book-title">浮生六记</div><div class="book-price">¥ 3.00</div></div>
-                        <div class="book-item"><div class="book-cover c10"><div>周国平：<br>宝贝</div></div><div class="book-title">周国平：宝贝</div><div class="book-price">¥ 8.00</div></div>
-                        <div class="book-item"><div class="book-cover c9"><div>岳飞传</div></div><div class="book-title">岳飞传</div><div class="book-price">¥ 3.00</div></div>
-                        <div class="book-item"><div class="book-cover c5"><div>撒哈拉的<br>眼泪</div></div><div class="book-title">撒哈拉的眼泪</div><div class="book-price">¥ 5.96</div></div>
-                    </div>
-                    <div class="rank-box">
-                        <div class="rank-title">文学艺术订阅榜</div>
-                        <ol class="rank-list">
-                            <li>2012诺贝尔文学奖得主莫言</li>
-                            <li>变：2012诺贝尔文学奖得</li>
-                            <li>逃离：2013诺贝尔文学奖得</li>
-                            <li>青春（韩寒2011最新作品）</li>
-                            <li>教你幽默到心田</li>
-                            <li>宝贝，宝贝</li>
-                            <li>白麻雀——白描籽的十二年</li>
-                            <li>中国式关系（全文）</li>
-                            <li>于丹：重温最美古诗词</li>
-                            <li>妞妞：一个父亲的札记</li>
-                        </ol>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </div>
-
-    <!-- 外部 Tab 组件 -->
-    <script src="js/tab.js"></script>
-    <script>
-        new TabSwitcher({
-            tabs:        '.tab-item',
-            panels:      '.tab-panel',
-            activeClass: 'active',
-            defaultIndex: 0
-        });
-    </script>
+        <footer class="yhr_footer">叶浩然 · 高级网页设计作业汇总 · 2026-2027-1</footer>
+    </main>
 </body>
 </html>
