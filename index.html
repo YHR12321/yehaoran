@@ -191,6 +191,41 @@
             border-color: #667eea;
         }
 
+        /* ========== 任务三演示视频 ========== */
+        .yhr_video-box {
+            margin-top: 18px;
+            padding: 14px;
+            border: 1px solid #e8ecf2;
+            border-radius: 12px;
+            background: #f9fafc;
+        }
+
+        .yhr_video-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 10px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #2b3a4a;
+        }
+
+        .yhr_video-head span {
+            font-size: 0.72rem;
+            font-weight: 400;
+            color: #8b98a4;
+        }
+
+        .yhr_video {
+            display: block;
+            width: 100%;
+            max-height: 420px;
+            border-radius: 10px;
+            background: #000;
+        }
+
         /* ========== 页脚 ========== */
         .yhr_footer {
             margin-top: 30px;
@@ -268,6 +303,24 @@
                     <p class="yhr_item-desc">监听 devicemotion 检测摇动，抽取今日菜谱，附降级按钮</p>
                     <p class="yhr_arrow">打开页面 →</p>
                 </a>
+            </div>
+
+            <!-- 任务三演示视频 -->
+            <div class="yhr_video-box">
+                <div class="yhr_video-head">
+                    任务三 · 图片查看器演示
+                    <span>双指缩放 / 单指拖动 / 双击切换</span>
+                </div>
+                <video class="yhr_video" src="videos/mobile-zoom-demo.mp4" controls playsinline webkit-playsinline preload="metadata"></video>
+            </div>
+
+            <!-- 任务四演示视频 -->
+            <div class="yhr_video-box">
+                <div class="yhr_video-head">
+                    任务四 · 摇一摇抽菜谱演示
+                    <span>摇动检测 / 随机抽取 / 降级按钮</span>
+                </div>
+                <video class="yhr_video" src="videos/mobile-sensor-demo.mp4" controls playsinline webkit-playsinline preload="metadata"></video>
             </div>
         </section>
 
