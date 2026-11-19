@@ -102,6 +102,25 @@
             color: #2e7d32;
             font-variant-numeric: tabular-nums;
         }
+
+        /* ========== 演示视频 ========== */
+        .yhr_demo {
+            margin-top: 16px;
+        }
+
+        .yhr_demo-title {
+            margin-bottom: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #2b3a4a;
+        }
+
+        .yhr_demo video {
+            display: block;
+            width: 100%;
+            border-radius: 10px;
+            background: #000;
+        }
     </style>
 </head>
 <body>
@@ -121,6 +140,12 @@
             <span>当前缩放：<b class="yhr_scale" id="yhrScale">1.0x</b></span>
             <span>双击放大 / 缩小 · 单指拖动</span>
         </div>
+
+        <!-- 任务三演示视频：双指缩放 / 单指拖动 / 双击切换 -->
+        <section class="yhr_demo">
+            <h2 class="yhr_demo-title">演示视频</h2>
+            <video src="videos/mobile-zoom-demo.mp4" controls playsinline webkit-playsinline preload="metadata"></video>
+        </section>
     </main>
 
     <script>

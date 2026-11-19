@@ -4,9 +4,9 @@
  * 文件名称：index.html
  * 作    者：叶浩然
  * 学    号：24002120407
- * 建立时间：2026-11-18
+ * 建立时间：2026-11-19
  * 大模型：Trae
- * 功能名称：个人作业首页（汇总移动端交互任务与课堂练习页面入口）
+ * 功能名称：个人作业唯一首页（侧边栏 course-list + 模块卡片 module-card + 页脚 footer-links 三处入口）
  * =========================================================
 -->
 <html lang="zh-CN">
@@ -24,72 +24,137 @@
 
         body {
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 32px 16px;
+            padding: 28px 16px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
             color: #333;
         }
 
-        /* ========== 主卡片 ========== */
-        .yhr_card {
-            width: 100%;
-            max-width: 760px;
-            background: rgba(255, 255, 255, 0.96);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px 44px 30px;
+        /* ========== 整体布局：侧边栏 + 主内容 ========== */
+        .yhr_layout {
+            max-width: 1120px;
+            margin: 0 auto;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
         }
 
-        /* ========== 头部个人信息 ========== */
-        .yhr_profile {
+        /* ========== 侧边栏 ========== */
+        .yhr_sidebar {
+            width: 236px;
+            flex: 0 0 236px;
+            position: sticky;
+            top: 28px;
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 18px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            padding: 22px 16px;
+        }
+
+        .yhr_brand {
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding-bottom: 24px;
+            gap: 12px;
+            padding: 0 6px 18px;
             border-bottom: 1px solid #eef0f4;
         }
 
         .yhr_avatar {
-            width: 58px;
-            height: 58px;
-            flex: 0 0 58px;
+            width: 46px;
+            height: 46px;
+            flex: 0 0 46px;
             border-radius: 50%;
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: #fff;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
-            letter-spacing: 1px;
         }
 
         .yhr_name {
-            font-size: 1.35rem;
+            font-size: 1.05rem;
             font-weight: 700;
             color: #222c38;
         }
 
         .yhr_meta {
-            margin-top: 6px;
-            font-size: 0.8rem;
+            margin-top: 4px;
+            font-size: 0.68rem;
             color: #7c8b98;
             letter-spacing: 0.5px;
         }
 
-        /* ========== 分区标题 ========== */
+        /* 侧边栏课程列表：首页入口之一 */
+        .course-list {
+            list-style: none;
+            margin-top: 14px;
+        }
+
+        .course-list .yhr_group {
+            margin: 16px 6px 6px;
+            font-size: 0.66rem;
+            color: #a3aeba;
+            letter-spacing: 1px;
+        }
+
+        .course-list a {
+            display: block;
+            padding: 9px 12px;
+            margin-bottom: 2px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: #4a5a6a;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .course-list a:hover {
+            background: #eef1fe;
+            color: #667eea;
+        }
+
+        .course-list a.yhr_active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* ========== 主内容卡片 ========== */
+        .yhr_main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .yhr_card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 18px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            padding: 30px 32px 24px;
+        }
+
+        .yhr_title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #222c38;
+        }
+
+        .yhr_subtitle {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: #7c8b98;
+        }
+
         .yhr_section {
-            margin-top: 28px;
+            margin-top: 26px;
         }
 
         .yhr_section-title {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.92rem;
+            font-size: 0.95rem;
             font-weight: 600;
             color: #2b3a4a;
         }
@@ -103,20 +168,19 @@
         }
 
         .yhr_section-desc {
-            margin-top: 6px;
-            margin-bottom: 14px;
+            margin: 6px 0 14px;
             font-size: 0.76rem;
             color: #8b98a4;
         }
 
-        /* ========== 任务卡片 ========== */
+        /* ========== 模块卡片：首页入口之二 ========== */
         .yhr_grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 14px;
         }
 
-        .yhr_item {
+        .module-card {
             display: block;
             padding: 16px 18px;
             border: 1px solid #e8ecf2;
@@ -127,7 +191,7 @@
             transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
         }
 
-        .yhr_item:hover {
+        .module-card:hover {
             transform: translateY(-3px);
             border-color: #c7d0fb;
             box-shadow: 0 10px 24px rgba(102, 126, 234, 0.18);
@@ -165,180 +229,222 @@
             font-weight: 600;
         }
 
-        /* ========== 普通链接列表 ========== */
-        .yhr_list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            list-style: none;
-        }
-
-        .yhr_list a {
-            display: inline-block;
-            padding: 9px 16px;
-            font-size: 0.8rem;
-            color: #4a5a6a;
-            background: #f6f8fb;
-            border: 1px solid #e8ecf2;
-            border-radius: 20px;
-            text-decoration: none;
-            transition: color 0.2s, border-color 0.2s, background 0.2s;
-        }
-
-        .yhr_list a:hover {
-            color: #fff;
-            background: #667eea;
-            border-color: #667eea;
-        }
-
-        /* ========== 任务三演示视频 ========== */
-        .yhr_video-box {
-            margin-top: 18px;
-            padding: 14px;
-            border: 1px solid #e8ecf2;
-            border-radius: 12px;
-            background: #f9fafc;
-        }
-
-        .yhr_video-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 10px;
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: #2b3a4a;
-        }
-
-        .yhr_video-head span {
-            font-size: 0.72rem;
-            font-weight: 400;
-            color: #8b98a4;
-        }
-
-        .yhr_video {
-            display: block;
-            width: 100%;
-            max-height: 420px;
-            border-radius: 10px;
-            background: #000;
-        }
-
-        /* ========== 页脚 ========== */
+        /* ========== 页脚链接：首页入口之三 ========== */
         .yhr_footer {
             margin-top: 30px;
-            padding-top: 16px;
+            padding-top: 18px;
             border-top: 1px solid #eef0f4;
             text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px 14px;
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            font-size: 0.74rem;
+            color: #7c8b98;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #667eea;
+        }
+
+        .yhr_copy {
             font-size: 0.72rem;
             color: #a3aeba;
             letter-spacing: 0.5px;
         }
 
-        /* ========== 小屏适配 ========== */
+        /* ========== 响应式 ========== */
+        @media (max-width: 900px) {
+            .yhr_layout {
+                flex-direction: column;
+            }
+
+            .yhr_sidebar {
+                width: 100%;
+                flex: none;
+                position: static;
+            }
+
+            .course-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+
+            .course-list .yhr_group {
+                width: 100%;
+                margin: 10px 6px 4px;
+            }
+
+            .course-list a {
+                margin-bottom: 0;
+            }
+        }
+
         @media (max-width: 640px) {
             body {
-                align-items: flex-start;
-                padding: 18px 12px 28px;
+                padding: 16px 10px 24px;
             }
 
             .yhr_card {
-                padding: 26px 20px 22px;
-                border-radius: 16px;
+                padding: 22px 18px 18px;
             }
 
             .yhr_grid {
                 grid-template-columns: 1fr;
             }
 
-            .yhr_name {
-                font-size: 1.15rem;
+            .yhr_title {
+                font-size: 1.2rem;
             }
         }
     </style>
 </head>
 <body>
-    <main class="yhr_card">
-        <!-- 个人信息 -->
-        <header class="yhr_profile">
-            <div class="yhr_avatar">叶</div>
-            <div>
-                <h1 class="yhr_name">叶浩然</h1>
-                <p class="yhr_meta">学号 24002120407 · 高级网页设计 · 2026-2027-1</p>
-            </div>
-        </header>
-
-        <!-- 移动端交互任务 -->
-        <section class="yhr_section">
-            <h2 class="yhr_section-title">移动端交互任务</h2>
-            <p class="yhr_section-desc">建议用手机打开，或在浏览器 DevTools 设备模式下体验</p>
-
-            <div class="yhr_grid">
-                <a class="yhr_item" href="touch-probe.html">
-                    <span class="yhr_item-no">任务一</span>
-                    <div class="yhr_item-title">触摸事件探针</div>
-                    <p class="yhr_item-desc">依次完成单击、拖动、快速滑、双指、长按，自动记录事件触发顺序</p>
-                    <p class="yhr_arrow">打开页面 →</p>
-                </a>
-
-                <a class="yhr_item" href="mobile-gesture.html">
-                    <span class="yhr_item-no">任务二</span>
-                    <div class="yhr_item-title">美食卡片滑动</div>
-                    <p class="yhr_item-desc">左右滑动切换四道菜，40px 阈值、边界提示与 300ms 冷却</p>
-                    <p class="yhr_arrow">打开页面 →</p>
-                </a>
-
-                <a class="yhr_item" href="mobile-zoom.html">
-                    <span class="yhr_item-no">任务三</span>
-                    <div class="yhr_item-title">图片查看器</div>
-                    <p class="yhr_item-desc">双指缩放 1~4 倍、单指拖动、双击在 1x 与 2x 之间切换</p>
-                    <p class="yhr_arrow">打开页面 →</p>
-                </a>
-
-                <a class="yhr_item" href="mobile-sensor.html">
-                    <span class="yhr_item-no">任务四</span>
-                    <div class="yhr_item-title">摇一摇抽菜谱</div>
-                    <p class="yhr_item-desc">监听 devicemotion 检测摇动，抽取今日菜谱，附降级按钮</p>
-                    <p class="yhr_arrow">打开页面 →</p>
-                </a>
-            </div>
-
-            <!-- 任务三演示视频 -->
-            <div class="yhr_video-box">
-                <div class="yhr_video-head">
-                    任务三 · 图片查看器演示
-                    <span>双指缩放 / 单指拖动 / 双击切换</span>
+    <div class="yhr_layout">
+        <!-- 侧边栏：入口一 course-list -->
+        <aside class="yhr_sidebar">
+            <div class="yhr_brand">
+                <div class="yhr_avatar">叶</div>
+                <div>
+                    <div class="yhr_name">叶浩然</div>
+                    <p class="yhr_meta">学号 24002120407</p>
                 </div>
-                <video class="yhr_video" src="videos/mobile-zoom-demo.mp4" controls playsinline webkit-playsinline preload="metadata"></video>
             </div>
+            <nav>
+                <ul class="course-list">
+                    <li><a class="yhr_active" href="index.html">首页</a></li>
+                    <li class="yhr_group">移动端交互任务</li>
+                    <li><a href="touch-probe.html">任务一 · 触摸事件探针</a></li>
+                    <li><a href="mobile-gesture.html">任务二 · 美食卡片滑动</a></li>
+                    <li><a href="mobile-zoom.html">任务三 · 图片查看器</a></li>
+                    <li><a href="mobile-sensor.html">任务四 · 摇一摇抽菜谱</a></li>
+                    <li class="yhr_group">课堂练习</li>
+                    <li><a href="swiper-task.html">Swiper 轮播任务</a></li>
+                    <li><a href="tab-news.html">新闻 Tab 选项卡</a></li>
+                    <li><a href="tushuwenjian.html">图书分类页</a></li>
+                    <li><a href="svg.html">SVG 图标</a></li>
+                    <li><a href="review-flex.html">布局复习</a></li>
+                </ul>
+            </nav>
+        </aside>
 
-            <!-- 任务四演示视频 -->
-            <div class="yhr_video-box">
-                <div class="yhr_video-head">
-                    任务四 · 摇一摇抽菜谱演示
-                    <span>摇动检测 / 随机抽取 / 降级按钮</span>
-                </div>
-                <video class="yhr_video" src="videos/mobile-sensor-demo.mp4" controls playsinline webkit-playsinline preload="metadata"></video>
+        <!-- 主内容 -->
+        <main class="yhr_main">
+            <div class="yhr_card">
+                <header>
+                    <h1 class="yhr_title">高级网页设计 · 作业汇总</h1>
+                    <p class="yhr_subtitle">叶浩然 · 24002120407 · 2026-2027-1</p>
+                </header>
+
+                <!-- 移动端交互任务 -->
+                <section class="yhr_section">
+                    <h2 class="yhr_section-title">移动端交互任务</h2>
+                    <p class="yhr_section-desc">建议用手机打开，或在浏览器 DevTools 设备模式下体验</p>
+
+                    <!-- 模块卡片：入口二 module-card -->
+                    <div class="yhr_grid">
+                        <a class="module-card" href="touch-probe.html">
+                            <span class="yhr_item-no">任务一</span>
+                            <div class="yhr_item-title">触摸事件探针</div>
+                            <p class="yhr_item-desc">依次完成单击、拖动、快速滑、双指、长按，自动记录事件触发顺序</p>
+                            <p class="yhr_arrow">打开页面 →</p>
+                        </a>
+
+                        <a class="module-card" href="mobile-gesture.html">
+                            <span class="yhr_item-no">任务二</span>
+                            <div class="yhr_item-title">美食卡片滑动</div>
+                            <p class="yhr_item-desc">左右滑动切换四道菜，40px 阈值、边界提示与 300ms 冷却</p>
+                            <p class="yhr_arrow">打开页面 →</p>
+                        </a>
+
+                        <a class="module-card" href="mobile-zoom.html">
+                            <span class="yhr_item-no">任务三</span>
+                            <div class="yhr_item-title">图片查看器</div>
+                            <p class="yhr_item-desc">双指缩放 1~4 倍、单指拖动、双击在 1x 与 2x 之间切换</p>
+                            <p class="yhr_arrow">打开页面 →</p>
+                        </a>
+
+                        <a class="module-card" href="mobile-sensor.html">
+                            <span class="yhr_item-no">任务四</span>
+                            <div class="yhr_item-title">摇一摇抽菜谱</div>
+                            <p class="yhr_item-desc">监听 devicemotion 检测摇动，抽取今日菜谱，附降级按钮</p>
+                            <p class="yhr_arrow">打开页面 →</p>
+                        </a>
+                    </div>
+
+                </section>
+
+                <!-- 课堂练习 -->
+                <section class="yhr_section">
+                    <h2 class="yhr_section-title">课堂练习</h2>
+                    <p class="yhr_section-desc">课程中完成的组件与布局练习</p>
+
+                    <div class="yhr_grid">
+                        <a class="module-card" href="swiper-task.html">
+                            <span class="yhr_item-no">组件</span>
+                            <div class="yhr_item-title">Swiper 轮播任务</div>
+                            <p class="yhr_item-desc">Swiper 轮播组件的四个初始化任务</p>
+                            <p class="yhr_arrow">打开页面 →</p>
+                        </a>
+
+                        <a class="module-card" href="tab-news.html">
+                            <span class="yhr_item-no">组件</span>
+                            <div class="yhr_item-title">新闻 Tab 选项卡</div>
+                            <p class="yhr_item-desc">Tab 切换新闻列表，原生 JS 实现</p>
+                            <p class="yhr_arrow">打开页面 →</p>
+                        </a>
+
+                        <a class="module-card" href="tushuwenjian.html">
+                            <span class="yhr_item-no">布局</span>
+                            <div class="yhr_item-title">图书分类页</div>
+                            <p class="yhr_item-desc">文学社科类图书展示页面</p>
+                            <p class="yhr_arrow">打开页面 →</p>
+                        </a>
+
+                        <a class="module-card" href="svg.html">
+                            <span class="yhr_item-no">图形</span>
+                            <div class="yhr_item-title">SVG 图标</div>
+                            <p class="yhr_item-desc">SVG 矢量图标绘制练习</p>
+                            <p class="yhr_arrow">打开页面 →</p>
+                        </a>
+
+                        <a class="module-card" href="review-flex.html">
+                            <span class="yhr_item-no">布局</span>
+                            <div class="yhr_item-title">布局复习</div>
+                            <p class="yhr_item-desc">Flex 等 CSS 布局方式复习</p>
+                            <p class="yhr_arrow">打开页面 →</p>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- 页脚：入口三 footer-links -->
+                <footer class="yhr_footer">
+                    <nav class="footer-links">
+                        <a href="index.html">首页</a>
+                        <a href="touch-probe.html">任务一</a>
+                        <a href="mobile-gesture.html">任务二</a>
+                        <a href="mobile-zoom.html">任务三</a>
+                        <a href="mobile-sensor.html">任务四</a>
+                        <a href="swiper-task.html">Swiper</a>
+                        <a href="tab-news.html">Tab 选项卡</a>
+                        <a href="tushuwenjian.html">图书分类</a>
+                        <a href="svg.html">SVG</a>
+                        <a href="review-flex.html">布局复习</a>
+                    </nav>
+                    <p class="yhr_copy">叶浩然 · 高级网页设计作业汇总 · 2026-2027-1</p>
+                </footer>
             </div>
-        </section>
-
-        <!-- 课堂练习 -->
-        <section class="yhr_section">
-            <h2 class="yhr_section-title">课堂练习</h2>
-            <p class="yhr_section-desc">课程中完成的组件与布局练习</p>
-
-            <ul class="yhr_list">
-                <li><a href="swiper-task.html">Swiper 轮播任务</a></li>
-                <li><a href="tab-news.html">新闻 Tab 选项卡</a></li>
-                <li><a href="tushuwenjian.html">图书分类页</a></li>
-                <li><a href="svg.html">SVG 图标</a></li>
-                <li><a href="review-flex.html">布局复习</a></li>
-            </ul>
-        </section>
-
-        <footer class="yhr_footer">叶浩然 · 高级网页设计作业汇总 · 2026-2027-1</footer>
-    </main>
+        </main>
+    </div>
 </body>
 </html>

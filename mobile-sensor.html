@@ -152,6 +152,25 @@
             transform: translateY(1px);
             box-shadow: 0 3px 10px rgba(76, 175, 80, 0.28);
         }
+
+        /* ========== 演示视频 ========== */
+        .yhr_demo {
+            margin-top: 20px;
+        }
+
+        .yhr_demo-title {
+            margin-bottom: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #2b3a4a;
+        }
+
+        .yhr_demo video {
+            display: block;
+            width: 100%;
+            border-radius: 10px;
+            background: #000;
+        }
     </style>
 </head>
 <body>
@@ -173,6 +192,12 @@
 
             <!-- 需求 5：降级方案按钮 -->
             <button class="yhr_btn" id="yhrBtn" type="button">点我抽一次</button>
+        </section>
+
+        <!-- 任务四演示视频：摇动检测 / 随机抽取 / 降级按钮 -->
+        <section class="yhr_demo">
+            <h2 class="yhr_demo-title">演示视频</h2>
+            <video src="videos/mobile-sensor-demo.mp4" controls playsinline webkit-playsinline preload="metadata"></video>
         </section>
     </main>
 
